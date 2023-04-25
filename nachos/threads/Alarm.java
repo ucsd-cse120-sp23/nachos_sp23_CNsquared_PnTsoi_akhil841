@@ -81,7 +81,7 @@ public class Alarm {
 	}
 
     public static void alarmTest0() {
-		int durations[] = {999, 10*1000, 100*1000};
+		int durations[] = {999, -10*1000, 100*1000, 0};
 		long t0, t1;
 
 		for (int d : durations) {
