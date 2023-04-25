@@ -284,11 +284,13 @@ public class KThread {
 	 */
 	public void join() {
 		Machine.interrupt().disable();
+		child = this;
 
 		Lib.debug(dbgThread, "Joining to thread: " + toString());
 
 		Lib.assertTrue(this != currentThread);
 		Lib.assertTrue(parent == null);
+		Lib.assertTrue(child != currentThread.parent);
 
 		parent = currentThread;
 		parent.sleep();
@@ -499,5 +501,6 @@ public class KThread {
 
 	private static KThread idleThread = null;
 
-	private static KThread parent = null;
+	public static KThread parent = null;
+	public static KThread child = null;
 }
