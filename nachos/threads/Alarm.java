@@ -36,7 +36,7 @@ public class Alarm {
 		// KThread.currentThread().yield();
 		long currentTime = Machine.timer().getTime();
 
-		while(currentTime >= sleptThreadQueue.firstKey()) {
+		while(!sleptThreadQueue.isEmpty() && currentTime >= sleptThreadQueue.firstKey()) {
 			KThread nextAwKThread = sleptThreadQueue.pollFirstEntry().getValue();
 			nextAwKThread.ready();
 		}
