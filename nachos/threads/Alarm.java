@@ -59,7 +59,7 @@ public class Alarm {
 		if(x <= 0) return;
 		long wakeTime = Machine.timer().getTime() + x;
 		sleptThreadQueue.put(wakeTime, KThread.currentThread());
-		KThread.sleep();
+		KThread.currentThread().sleep();
 		
 		// while (wakeTime > Machine.timer().getTime())
 		// 	KThread.yield();
