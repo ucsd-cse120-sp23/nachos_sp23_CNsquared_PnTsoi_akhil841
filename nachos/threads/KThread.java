@@ -288,12 +288,12 @@ public class KThread {
 
 		Lib.debug(dbgThread, "Joining to thread: " + toString());
 
-		Lib.assertTrue(this != currentThread);
+		Lib.assertTrue(this.compareTo(currentThread) != 0 );
 		Lib.assertTrue(parent == null);
 		if(currentThread.child != null) {
-			Lib.assertTrue(currentThread.child.child != this);
+			Lib.assertTrue(currentThread.child.child.compareTo(this) != 0 );
 		}
-		Lib.assertTrue(currentThread.parent != this);
+		Lib.assertTrue(currentThread.parent.compareTo(this) != 0);
 
 		parent = currentThread;
 		parent.sleep();
