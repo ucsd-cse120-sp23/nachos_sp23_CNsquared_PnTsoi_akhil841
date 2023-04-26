@@ -284,13 +284,13 @@ public class KThread {
 	 */
 	public void join() {
 		Machine.interrupt().disable();
-		child = this;
+		currentThread.child = this;
 
 		Lib.debug(dbgThread, "Joining to thread: " + toString());
 
 		Lib.assertTrue(this != currentThread);
 		Lib.assertTrue(parent == null);
-		Lib.assertTrue(child != currentThread.parent);
+		Lib.assertTrue(currentThread.parent != this.child);
 
 		parent = currentThread;
 		parent.sleep();
