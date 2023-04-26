@@ -290,7 +290,7 @@ public class KThread {
 
 		Lib.assertTrue(this != currentThread);
 		Lib.assertTrue(parent == null);
-		Lib.assertTrue(currentThread.parent != this.child);
+		Lib.assertTrue(currentThread.parent != this);
 
 		parent = currentThread;
 		parent.sleep();
