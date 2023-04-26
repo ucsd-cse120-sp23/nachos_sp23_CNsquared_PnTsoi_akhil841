@@ -293,7 +293,9 @@ public class KThread {
 		if(currentThread.child != null) {
 			Lib.assertTrue(currentThread.child.child.compareTo(currentThread) != 0 );
 		}
-		Lib.assertTrue(currentThread.parent.compareTo(this) != 0);
+
+		if(currentThread.parent != null)
+			Lib.assertTrue(currentThread.parent.compareTo(this) != 0);
 
 		parent = currentThread;
 		parent.sleep();
