@@ -167,9 +167,9 @@ public class Condition2 {
         // implemented join yet, then comment out the calls to join
         // and instead uncomment the loop with yield; the loop has the
         // same effect, but is a kludgy way to do it.
-        // consumer.join();
-        // producer.join();
-        for (int i = 0; i < 50; i++) { KThread.currentThread().yield(); }
+        consumer.join();
+        producer.join();
+        // for (int i = 0; i < 50; i++) { KThread.currentThread().yield(); }
     }
 
     // Invoke Condition2.selfTest() from ThreadedKernel.selfTest()

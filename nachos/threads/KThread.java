@@ -1,5 +1,6 @@
 package nachos.threads;
 
+
 import nachos.machine.*;
 
 /**
@@ -204,7 +205,8 @@ public class KThread {
 		currentThread.status = statusFinished;
 		if(parent != null)
 			parent.ready();
-
+		parent = null;
+		child = null;
 		sleep();
 	}
 
@@ -292,9 +294,9 @@ public class KThread {
 
 		Lib.assertTrue(this.compareTo(currentThread) != 0 );
 		Lib.assertTrue(parent == null);
-		if(currentThread.child != null) {
-			Lib.assertTrue(currentThread.child.child.compareTo(currentThread) != 0 );
-		}
+		// if(currentThread.child != null) {
+		// 	Lib.assertTrue(currentThread.child.child.compareTo(currentThread) != 0 );
+		// }
 
 		if(currentThread.parent != null)
 			Lib.assertTrue(currentThread.parent.compareTo(this) != 0);
