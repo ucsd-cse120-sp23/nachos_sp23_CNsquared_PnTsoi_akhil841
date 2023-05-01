@@ -186,13 +186,19 @@ public class Condition2 {
     private static void sleepForTest1 () {
         Lock lock = new Lock();
         Condition2 cv = new Condition2(lock);
-
+        KThread consumer = new KThread( new Runnable () {
+                public void run() {
+                    ThreadedKernel.alarm.waitUntil(1000);
+                    cv.wake();
+                }
+            });
         lock.acquire();
         long t0 = Machine.timer().getTime();
         System.out.println (KThread.currentThread().getName() + " sleeping");
+        consumer.setName("consumer");
+        consumer.fork();
         // no other thread will wake us up, so we should time out
         cv.sleepFor(200000);
-        cv.wake();
         long t1 = Machine.timer().getTime();
         System.out.println(KThread.currentThread().getName() +
                            " woke up, slept for " + (t1 - t0) + " ticks");
