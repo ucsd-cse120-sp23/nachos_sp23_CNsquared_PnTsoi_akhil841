@@ -54,6 +54,7 @@ public class Condition2 {
 		if(!waitQueue.isEmpty()) {
 			KThread wokeThread = ((KThread) waitQueue.removeFirst());
             ThreadedKernel.alarm.cancel(wokeThread);
+            System.out.println("wake "+wokeThread.getName());
             wokeThread.ready();
         }
 
