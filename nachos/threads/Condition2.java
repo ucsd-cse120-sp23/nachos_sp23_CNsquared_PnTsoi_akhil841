@@ -130,6 +130,7 @@ public class Condition2 {
                     while(list.isEmpty()){
                         empty.sleep();
                     }
+                    System.out.println("List has " + list.size() + " values.");
                     Lib.assertTrue(list.size() == 5, "List should have 5 values.");
                     while(!list.isEmpty()) {
                         // context swith for the fun of it
