@@ -209,6 +209,8 @@ public class KThread {
 		child = null;
 		currentThread.child = null;
 		sleep();
+
+		Machine.interrupt().enable();
 	}
 
 	/**
@@ -291,7 +293,7 @@ public class KThread {
 
 		Lib.debug(dbgThread, "Joining to thread: " + toString());
 		if(this.status == statusFinished) return;
-		currentThread.child = this;
+		// currentThread.child = this;
 
 		Lib.assertTrue(this.compareTo(currentThread) != 0 );
 		Lib.assertTrue(parent == null);
@@ -299,8 +301,8 @@ public class KThread {
 		// 	Lib.assertTrue(currentThread.child.child.compareTo(currentThread) != 0 );
 		// }
 
-		if(currentThread.parent != null)
-			Lib.assertTrue(currentThread.parent.compareTo(this) != 0);
+		// if(currentThread.parent != null)
+		// 	Lib.assertTrue(currentThread.parent.compareTo(this) != 0);
 
 		parent = currentThread;
 		parent.sleep();
