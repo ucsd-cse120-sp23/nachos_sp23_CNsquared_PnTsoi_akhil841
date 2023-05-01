@@ -2,6 +2,7 @@ package nachos.threads;
 
 import nachos.machine.*;
 
+import java.util.Map;
 import java.util.TreeMap;
 /**
  * Uses the hardware timer to provide preemption, and to allow threads to sleep
@@ -34,12 +35,14 @@ public class Alarm {
 	 */
 	public void timerInterrupt() {
 		// KThread.currentThread().yield();
+		lock.acquire();
 		long currentTime = Machine.timer().getTime();
 
 		while(!sleptThreadQueue.isEmpty() && currentTime >= sleptThreadQueue.firstKey()) {
 			KThread nextAwKThread = sleptThreadQueue.pollFirstEntry().getValue();
 			nextAwKThread.ready();
 		}
+		lock.release();
 	}
 
 	/**
@@ -57,12 +60,15 @@ public class Alarm {
 	public void waitUntil(long x) {
 		// for now, cheat just to get something working (busy waiting is bad)
 		Machine.interrupt().disable();
+		lock.acquire();
+		
 		if(x <= 0) return;
 		long wakeTime = Machine.timer().getTime() + x;
 		sleptThreadQueue.put(wakeTime, KThread.currentThread());
 		KThread.currentThread().sleep();
-		
-		Machine.interrupt().enable();
+
+		lock.release();
+		Machine.interrupt().enable();	
 		// while (wakeTime > Machine.timer().getTime())
 		// 	KThread.yield();
 	}
@@ -76,8 +82,24 @@ public class Alarm {
 	 * <p>
 	 * @param thread the thread whose timer should be cancelled.
 	 */
-        public boolean cancel(KThread thread) {
-		return false;
+	public boolean cancel(KThread thread) {
+		lock.acquire();
+
+		if(sleptThreadQueue.containsValue(thread)) {
+			for(Map.Entry<Long, KThread> entry : sleptThreadQueue.entrySet()) {
+				if(entry.getValue() == thread) {
+					sleptThreadQueue.remove(entry.getKey());
+					lock.release();
+					return true;
+				}
+			}
+			lock.release();
+			return true;
+		}
+		else {
+			lock.release();
+			return false;
+		}
 	}
 
     public static void alarmTest0() {
@@ -97,7 +119,8 @@ public class Alarm {
     // Invoke Alarm.selfTest() from ThreadedKernel.selfTest()
     public static void selfTest() {
 		alarmTest0();
-
 	// Invoke your other test methods here ...
     }
+
+	final Lock lock = new Lock();
 }

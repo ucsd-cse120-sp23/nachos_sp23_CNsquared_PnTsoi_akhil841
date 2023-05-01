@@ -50,8 +50,11 @@ public class Condition2 {
 	public void wake() {
 		boolean intStatus = Machine.interrupt().disable();
 		Lib.assertTrue(conditionLock.isHeldByCurrentThread());
-		if(!waitQueue.isEmpty())
-			((KThread) waitQueue.removeFirst()).ready();
+		if(!waitQueue.isEmpty()) {
+			KThread wokeThread = ((KThread) waitQueue.removeFirst());
+            ThreadedKernel.alarm.cancel(wokeThread);
+            wokeThread.ready();
+        }
 
 		Machine.interrupt().restore(intStatus);
 	}
@@ -63,8 +66,11 @@ public class Condition2 {
 	public void wakeAll() {
 		boolean intStatus = Machine.interrupt().disable();
 		Lib.assertTrue(conditionLock.isHeldByCurrentThread());
-		while(!waitQueue.isEmpty())
-			((KThread) waitQueue.removeFirst()).ready();
+		while(!waitQueue.isEmpty()) {
+            KThread wokeThread = ((KThread) waitQueue.removeFirst());
+            ThreadedKernel.alarm.cancel(wokeThread);
+            wokeThread.ready();
+        }
 
 		Machine.interrupt().restore(intStatus);
 	}
@@ -173,14 +179,41 @@ public class Condition2 {
         System.out.println("Producer joined");
         // for (int i = 0; i < 50; i++) { KThread.currentThread().yield(); }
     }
+    // Place sleepFor test code inside of the Condition2 class.
 
-    // Invoke Condition2.selfTest() from ThreadedKernel.selfTest()
-    public static void selfTest() {
-        new InterlockTest();
+    private static void sleepForTest1 () {
+        Lock lock = new Lock();
+        Condition2 cv = new Condition2(lock);
+
+        lock.acquire();
+        long t0 = Machine.timer().getTime();
+        System.out.println (KThread.currentThread().getName() + " sleeping");
+        // no other thread will wake us up, so we should time out
+        cv.sleepFor(2000);
+        long t1 = Machine.timer().getTime();
+        System.out.println (KThread.currentThread().getName() +
+                    " woke up, slept for " + (t1 - t0) + " ticks");
+        lock.release();
     }
 
+    public static void selfTest() {
+        sleepForTest1();
+    }
+    // Invoke Condition2.selfTest() from ThreadedKernel.selfTest()
+    // public static void selfTest() {
+    //     new InterlockTest();
+    // }
+
 	public void sleepFor(long timeout) {
+
+		Machine.interrupt().disable();
 		Lib.assertTrue(conditionLock.isHeldByCurrentThread());
+		waitQueue.add(KThread.currentThread());
+
+		conditionLock.release();
+        ThreadedKernel.alarm.waitUntil(timeout);
+		conditionLock.acquire();
+		Machine.interrupt().enable();
 	}
 
         private Lock conditionLock;
