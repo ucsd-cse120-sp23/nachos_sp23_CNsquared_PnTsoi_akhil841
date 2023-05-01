@@ -49,6 +49,7 @@ public class Condition2 {
 	 */
 	public void wake() {
 		boolean intStatus = Machine.interrupt().disable();
+        System.out.println("wake");
 		Lib.assertTrue(conditionLock.isHeldByCurrentThread());
 		if(!waitQueue.isEmpty()) {
 			KThread wokeThread = ((KThread) waitQueue.removeFirst());
