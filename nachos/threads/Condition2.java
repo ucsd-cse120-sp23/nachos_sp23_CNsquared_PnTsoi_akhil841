@@ -168,7 +168,9 @@ public class Condition2 {
         // and instead uncomment the loop with yield; the loop has the
         // same effect, but is a kludgy way to do it.
         consumer.join();
+        System.out.println("Consumer joined");
         producer.join();
+        System.out.println("Producer joined");
         // for (int i = 0; i < 50; i++) { KThread.currentThread().yield(); }
     }
 
