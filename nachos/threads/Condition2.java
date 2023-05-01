@@ -197,8 +197,9 @@ public class Condition2 {
         long t0 = Machine.timer().getTime();
         System.out.println (KThread.currentThread().getName() + " sleeping");
         consumer.setName("consumer");
-        cv.sleepFor(200000);
         consumer.fork();
+        cv.sleepFor(200000);
+        
         // no other thread will wake us up, so we should time out
         long t1 = Machine.timer().getTime();
         System.out.println(KThread.currentThread().getName() +
