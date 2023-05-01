@@ -35,14 +35,12 @@ public class Alarm {
 	 */
 	public void timerInterrupt() {
 		// KThread.currentThread().yield();
-		lock.acquire();
 		long currentTime = Machine.timer().getTime();
 
 		while(!sleptThreadQueue.isEmpty() && currentTime >= sleptThreadQueue.firstKey()) {
 			KThread nextAwKThread = sleptThreadQueue.pollFirstEntry().getValue();
 			nextAwKThread.ready();
 		}
-		lock.release();
 	}
 
 	/**
