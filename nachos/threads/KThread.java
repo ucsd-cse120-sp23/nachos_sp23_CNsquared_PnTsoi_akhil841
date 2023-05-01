@@ -207,6 +207,7 @@ public class KThread {
 			parent.ready();
 		parent = null;
 		child = null;
+		currentThread.child = null;
 		sleep();
 	}
 
