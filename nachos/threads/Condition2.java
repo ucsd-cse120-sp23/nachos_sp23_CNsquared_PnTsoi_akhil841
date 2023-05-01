@@ -1,6 +1,7 @@
 package nachos.threads;
 
 import nachos.machine.*;
+import java.util.LinkedList;
 
 /**
  * An implementation of condition variables that disables interrupt()s for
@@ -19,8 +20,10 @@ public class Condition2 {
 	 * The current thread must hold this lock whenever it uses <tt>sleep()</tt>,
 	 * <tt>wake()</tt>, or <tt>wakeAll()</tt>.
 	 */
+
 	public Condition2(Lock conditionLock) {
 		this.conditionLock = conditionLock;
+		waitQueue = new LinkedList<KThread>();
 	}
 
 	/**
@@ -66,4 +69,5 @@ public class Condition2 {
 	}
 
         private Lock conditionLock;
+		private LinkedList<KThread> waitQueue;
 }
