@@ -188,6 +188,7 @@ public class Condition2 {
         Condition2 cv = new Condition2(lock);
         KThread consumer = new KThread( new Runnable () {
                 public void run() {
+                    System.out.println(KThread.currentThread().getName() + " started");
                     ThreadedKernel.alarm.waitUntil(100000);
                     cv.wake();
                 }
