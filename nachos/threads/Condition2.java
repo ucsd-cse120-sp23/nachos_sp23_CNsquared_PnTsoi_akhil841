@@ -190,7 +190,7 @@ public class Condition2 {
                 public void run() {
                     System.out.println(KThread.currentThread().getName() + " started");
                     ThreadedKernel.alarm.waitUntil(100000);
-                    cv.wake();
+                    cv.wakeAll();
                 }
             });
         lock.acquire();
