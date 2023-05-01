@@ -48,10 +48,12 @@ public class Condition2 {
 	 * current thread must hold the associated lock.
 	 */
 	public void wake() {
+		boolean intStatus = Machine.interrupt().disable();
 		Lib.assertTrue(conditionLock.isHeldByCurrentThread());
 		if(!waitQueue.isEmpty())
 			((KThread) waitQueue.removeFirst()).ready();
 
+		Machine.interrupt().restore(intStatus);
 	}
 
 	/**
@@ -59,10 +61,12 @@ public class Condition2 {
 	 * thread must hold the associated lock.
 	 */
 	public void wakeAll() {
+		boolean intStatus = Machine.interrupt().disable();
 		Lib.assertTrue(conditionLock.isHeldByCurrentThread());
 		while(!waitQueue.isEmpty())
 			((KThread) waitQueue.removeFirst()).ready();
 
+		Machine.interrupt().restore(intStatus);
 	}
 
         /**
