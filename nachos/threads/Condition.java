@@ -145,7 +145,7 @@ public class Condition {
             // call to join and instead uncomment the loop with
             // yields; the loop has the same effect, but is a kludgy
             // way to do it.
-            // ping.join();
+            ping.join();
             // for (int i = 0; i < 50; i++) { KThread.currentThread().yield(); }
         }
     }
