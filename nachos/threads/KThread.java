@@ -292,7 +292,7 @@ public class KThread {
 	 */
 	public void join() {
 		Machine.interrupt().disable();
-
+		System.out.print(" is joining ");
 
 		Lib.debug(dbgThread, "Joining to thread: " + toString());
 		if(this.status == statusFinished) return;
