@@ -551,7 +551,12 @@ public class KThread {
 		child4 = new KThread( new Runnable () {
 			public void run() {
 				System.out.println(KThread.currentThread().getName() + " says hello world");
-				child1.join();
+				try {
+					child1.join();
+				}
+				catch(Exception e) {
+					System.out.println("Exception caught");
+				}
 			}
 			});
 		child3 = new KThread( new Runnable () {
