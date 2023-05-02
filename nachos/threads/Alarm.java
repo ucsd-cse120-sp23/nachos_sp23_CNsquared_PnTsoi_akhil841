@@ -134,16 +134,19 @@ public class Alarm {
 			public void run() {
 				long t0 = Machine.timer().getTime();
 				System.out.println("Child 1 started");
+				System.out.println("Child 1 sleep");
 				ThreadedKernel.alarm.waitUntil(100000);
-				System.out.println("Child 1 finished");
 				long t1 = Machine.timer().getTime();
 				System.out.println ("child1: waited for " + (t1 - t0) + " ticks");
+				System.out.println("Child 1 finished");
 			}
 		});
 		child1.setName("child1");
 		child1.fork();
+		System.out.println("Main thread sleep");
 		KThread.currentThread().yield();
 		ThreadedKernel.alarm.cancel(child1);
+		System.out.println("Main thread cancel child 1 alarm");
 	}
     // Implement more test methods here ...
 
