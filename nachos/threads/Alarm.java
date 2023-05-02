@@ -84,9 +84,11 @@ public class Alarm {
 		lock.acquire();
 
 		if(sleptThreadQueue.containsValue(thread)) {
+			System.out.println("Cancel thread " + thread.getName());
 			for(Map.Entry<Long, KThread> entry : sleptThreadQueue.entrySet()) {
 				if(entry.getValue() == thread) {
 					sleptThreadQueue.remove(entry.getKey());
+					System.out.println("found thread " + thread.getName());
 					lock.release();
 					return true;
 				}
