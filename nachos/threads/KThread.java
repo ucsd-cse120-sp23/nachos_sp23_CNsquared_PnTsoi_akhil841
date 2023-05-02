@@ -476,7 +476,9 @@ public class KThread {
 				child2.setName("child2").fork();
 				child2.join();
 				System.out.println(KThread.currentThread().getName() + " says hello world");
-				Lib.assertTrue((child2.status == statusFinished), " Expected child1 to be finished.");
+				System.out.println("After joining, child2 should be finished.");
+				System.out.println("is it? " + (child2.status == statusFinished));
+				Lib.assertTrue((child2.status == statusFinished), " Expected child2 to be finished.");
 			}
 			});
 		child1.setName("child1").fork();
