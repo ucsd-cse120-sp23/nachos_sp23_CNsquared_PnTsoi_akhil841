@@ -1,7 +1,8 @@
 package nachos.threads;
 
 import nachos.machine.*;
-
+import java.util.ArrayList;
+// import java.util.HashMap
 /**
  * A <i>Rendezvous</i> allows threads to synchronously exchange values.
  */
@@ -11,9 +12,8 @@ public class Rendezvous {
      */
     public Rendezvous () {
         rLock = new Lock();
-        bigLock = new Lock();
-        condition = new Condition(rLock);
-        flag = false;
+        // condition = new Condition(rLock);
+        // map = new HashMap<Integer, ArrayList<Object>>(); 
 
     }
 
@@ -34,21 +34,23 @@ public class Rendezvous {
      * @param value the integer to exchange.
      */
     public int exchange (int tag, int value) {
-        rLock.acquire();
-        if(!flag){
-            valueA = value;
-            flag = true;
-            condition.sleep();
-            rLock.release();
-            return valueB;
-        }
-        else{
-            valueB = value;
-            flag = false;
-            condition.wake();
-        }
-        rLock.release();
-        return valueA;
+        // rLock.acquire();
+        // if(!map.containsKey(tag)){
+        //     ArrayList<Object> list = new ArrayList<Object>();
+        //     list.add(new Condition(rLock)); 
+        //     list.add(value);
+        //     list.get(0).sleep();
+        //     rLock.release();
+        //     return valueB;
+        // }
+        // else{
+        //     valueB = value;
+        //     flag = false;
+        //     condition.wake();
+        // }
+        // rLock.release();
+        // return valueA;
+        return 0;
     }
     // Place Rendezvous test code inside of the Rendezvous class.
 
@@ -91,10 +93,8 @@ public class Rendezvous {
 	// place calls to your Rendezvous tests that you implement here
 	rendezTest1();
     }
-    private Condition condition;
+
     private Lock rLock;
-    private Lock bigLock;
-    private int valueA;
-    private int valueB;
+    // private HashMap<Integer, ArrayList<Object>> map;
     private boolean flag;
 }
