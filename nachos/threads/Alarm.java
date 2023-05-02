@@ -85,6 +85,7 @@ public class Alarm {
 			// System.out.println("Cancel thread " + thread.getName());
 			for(Map.Entry<Long, KThread> entry : sleptThreadQueue.entrySet()) {
 				if(entry.getValue() == thread) {
+					entry.getValue().ready();
 					sleptThreadQueue.remove(entry.getKey());
 					// System.out.println("found thread " + thread.getName());
 					Machine.interrupt().restore(intStatus);
