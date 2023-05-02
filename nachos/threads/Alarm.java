@@ -150,7 +150,8 @@ public class Alarm {
     // Invoke Alarm.selfTest() from ThreadedKernel.selfTest()
     public static void selfTest() {
 		// alarmTest0();
-		alarmTest1();
+		// alarmTest1();
+		alarmTest2();
 	// Invoke your other test methods here ...
     }
 
