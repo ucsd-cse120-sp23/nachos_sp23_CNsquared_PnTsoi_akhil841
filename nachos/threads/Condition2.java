@@ -184,29 +184,48 @@ public class Condition2 {
     // Place sleepFor test code inside of the Condition2 class.
 
     private static void sleepForTest1 () {
-        Lock lock = new Lock();
-        Condition2 cv = new Condition2(lock);
-        KThread consumer = new KThread( new Runnable () {
-                public void run() {
-                    System.out.println(KThread.currentThread().getName() + " started");
-                    ThreadedKernel.alarm.waitUntil(100000);
-                    cv.wakeAll();
-                }
-            });
-        lock.acquire();
-        long t0 = Machine.timer().getTime();
-        System.out.println (KThread.currentThread().getName() + " sleeping");
-        consumer.setName("consumer");
-        consumer.fork();
-        cv.sleepFor(200000);
-        lock.release();
-        consumer.join();
-        
-        // no other thread will wake us up, so we should time out
-        long t1 = Machine.timer().getTime();
-        System.out.println(KThread.currentThread().getName() +
-                           " woke up, slept for " + (t1 - t0) + " ticks");
-    }
+
+            final Lock lock = new Lock();
+            // final Condition empty = new Condition(lock);
+            final Condition2 cv = new Condition2(lock);
+            final LinkedList<Integer> list = new LinkedList<>();
+
+            KThread consumer = new KThread( new Runnable () {
+                    public void run() {
+                        lock.acquire();
+                        long t0 = Machine.timer().getTime();
+                        System.out.println (KThread.currentThread().getName() + " sleeping");
+                        cv.sleepFor(200000);
+                        long t1 = Machine.timer().getTime();
+                        System.out.println(KThread.currentThread().getName() +
+                            " woke up, slept for " + (t1 - t0) + " ticks");
+                        
+                        lock.release();
+                    }
+                });
+
+            KThread producer = new KThread( new Runnable () {
+                    public void run() {
+                        lock.acquire();
+                        cv.wake();
+                        
+                        lock.release();
+                    }
+                });
+
+            consumer.setName("Consumer");
+            producer.setName("Producer");
+            consumer.fork();
+            producer.fork();
+
+            consumer.join();
+            System.out.println("Consumer joined");
+            producer.join();
+            System.out.println("Producer joined");
+            
+        }
+
+
 
     public static void selfTest() {
         sleepForTest1();
