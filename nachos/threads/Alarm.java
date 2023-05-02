@@ -128,6 +128,23 @@ public class Alarm {
 		long t1 = Machine.timer().getTime();
 		System.out.println ("child1: waited for " + (t1 - t0) + " ticks");
     }
+
+	public static void alarmTest2() {
+		KThread child1 = new KThread(new Runnable() {
+			public void run() {
+				long t0 = Machine.timer().getTime();
+				System.out.println("Child 1 started");
+				ThreadedKernel.alarm.waitUntil(100000);
+				System.out.println("Child 1 finished");
+				long t1 = Machine.timer().getTime();
+				System.out.println ("child1: waited for " + (t1 - t0) + " ticks");
+			}
+		});
+		child1.setName("child1");
+		child1.fork();
+		KThread.currentThread().yield();
+		ThreadedKernel.alarm.cancel(child1);
+	}
     // Implement more test methods here ...
 
     // Invoke Alarm.selfTest() from ThreadedKernel.selfTest()
