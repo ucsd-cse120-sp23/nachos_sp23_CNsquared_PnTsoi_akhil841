@@ -199,6 +199,7 @@ public class Condition2 {
         consumer.setName("consumer");
         consumer.fork();
         cv.sleepFor(200000);
+        consumer.join();
         
         // no other thread will wake us up, so we should time out
         long t1 = Machine.timer().getTime();
