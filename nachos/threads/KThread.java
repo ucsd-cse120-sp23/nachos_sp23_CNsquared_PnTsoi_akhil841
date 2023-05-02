@@ -494,6 +494,36 @@ public class KThread {
 		System.out.println("is it? " + (child1.status == statusFinished));
 		Lib.assertTrue((child1.status == statusFinished), " Expected child1 to be finished.");
 	}
+
+	private static void joinTest3 () {
+		KThread child2 = new KThread( new Runnable () {
+			public void run() {
+				System.out.println(KThread.currentThread().getName() + " says hello world");
+			}
+			});
+		KThread child1 = new KThread( new Runnable () {
+			public void run() {
+				child2.setName("child2").fork();
+				child2.join();
+				System.out.println(KThread.currentThread().getName() + " says hello world");
+				System.out.println("After joining, child2 should be finished.");
+				System.out.println("is it? " + (child2.status == statusFinished));
+				Lib.assertTrue((child2.status == statusFinished), " Expected child2 to be finished.");
+			}
+			});
+		child1.setName("child1").fork();
+
+		child1.join();
+
+		for (int i = 0; i < 5; i++) {
+			System.out.println ("busy...");
+			KThread.currentThread().yield();
+		}
+
+		System.out.println("After joining, child1 should be finished.");
+		System.out.println("is it? " + (child1.status == statusFinished));
+		Lib.assertTrue((child1.status == statusFinished), " Expected child1 to be finished.");
+	}
 	/**
 	 * Tests whether this module is working.
 	 */
