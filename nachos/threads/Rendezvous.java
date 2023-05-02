@@ -2,7 +2,7 @@ package nachos.threads;
 
 import nachos.machine.*;
 import java.util.ArrayList;
-// import java.util.HashMap
+import java.util.HashMap;
 /**
  * A <i>Rendezvous</i> allows threads to synchronously exchange values.
  */
@@ -13,7 +13,7 @@ public class Rendezvous {
     public Rendezvous () {
         rLock = new Lock();
         // condition = new Condition(rLock);
-        // map = new HashMap<Integer, ArrayList<Object>>(); 
+        map = new HashMap<Integer, ArrayList<Object>>(); 
 
     }
 
@@ -34,23 +34,26 @@ public class Rendezvous {
      * @param value the integer to exchange.
      */
     public int exchange (int tag, int value) {
-        // rLock.acquire();
-        // if(!map.containsKey(tag)){
-        //     ArrayList<Object> list = new ArrayList<Object>();
-        //     list.add(new Condition(rLock)); 
-        //     list.add(value);
-        //     list.get(0).sleep();
-        //     rLock.release();
-        //     return valueB;
-        // }
-        // else{
-        //     valueB = value;
-        //     flag = false;
-        //     condition.wake();
-        // }
-        // rLock.release();
-        // return valueA;
-        return 0;
+        ArrayList<Object> list = new ArrayList<Object>();
+        rLock.acquire();
+        if(!map.containsKey(tag)){
+            list.add(new Condition(rLock)); 
+            list.add(value);
+            map.put(tag, list);
+            ( (Condition) list.get(0)).sleep();
+            rLock.release();
+            list = map.get(tag);
+            return (Integer)list.get(2);
+        }
+        else{
+            list = map.get(tag);
+            list.add(value);
+            ( (Condition) list.get(0)).wake();
+        }
+
+        rLock.release();
+        map.remove(tag);
+        return (Integer) list.get(1);
     }
     // Place Rendezvous test code inside of the Rendezvous class.
 
@@ -95,6 +98,6 @@ public class Rendezvous {
     }
 
     private Lock rLock;
-    // private HashMap<Integer, ArrayList<Object>> map;
-    private boolean flag;
+    private HashMap<Integer, ArrayList<Object>> map;
+    // private boolean flag;
 }
