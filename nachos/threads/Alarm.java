@@ -82,11 +82,11 @@ public class Alarm {
 		Boolean intStatus = Machine.interrupt().disable();
 
 		if(sleptThreadQueue.containsValue(thread)) {
-			System.out.println("Cancel thread " + thread.getName());
+			// System.out.println("Cancel thread " + thread.getName());
 			for(Map.Entry<Long, KThread> entry : sleptThreadQueue.entrySet()) {
 				if(entry.getValue() == thread) {
 					sleptThreadQueue.remove(entry.getKey());
-					System.out.println("found thread " + thread.getName());
+					// System.out.println("found thread " + thread.getName());
 					Machine.interrupt().restore(intStatus);
 					return true;
 				}
@@ -95,7 +95,7 @@ public class Alarm {
 			return true;
 		}
 		else {
-			System.out.println("thread " + thread.getName()+ " not found");
+			// System.out.println("thread " + thread.getName()+ " not found");
 			Machine.interrupt().restore(intStatus);
 			return false;
 		}
