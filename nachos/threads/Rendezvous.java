@@ -68,7 +68,7 @@ public class Rendezvous {
 
 		    System.out.println ("Thread " + KThread.currentThread().getName() + " exchanging " + send);
 		    int recv = r.exchange (tag, send);
-		    Lib.assertTrue (recv == 1, "Was expecting " + 1 + " but received " + recv);
+		    Lib.assertTrue (recv == 2, "Was expecting " + 2 + " but received " + recv);
 		    System.out.println ("Thread " + KThread.currentThread().getName() + " received " + recv);
 		}
 	    });
