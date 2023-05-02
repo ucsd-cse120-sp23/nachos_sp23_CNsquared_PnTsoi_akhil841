@@ -205,7 +205,9 @@ public class KThread {
 		currentThread.status = statusFinished;
 		if(currentThread.parent != null)
 			currentThread.parent.ready();
+		
 		currentThread.parent = null;
+		currentThread.parent.child = null;
 		currentThread.child = null;
 		sleep();
 
@@ -295,7 +297,15 @@ public class KThread {
 		// currentThread.child = this;
 
 		Lib.assertTrue(this.compareTo(currentThread) != 0 );
-		Lib.assertTrue(parent == null);
+		Lib.assertTrue(currentThread.child == null);
+		Lib.assertTrue(this.parent == null);
+		
+		KThread temp = this.child;
+
+		while(temp != null) {
+			Lib.assertTrue(temp.compareTo(currentThread) != 0);
+			temp = temp.child;
+		}
 		// if(currentThread.child != null) {
 		// 	Lib.assertTrue(currentThread.child.child.compareTo(currentThread) != 0 );
 		// }
@@ -304,6 +314,7 @@ public class KThread {
 		// 	Lib.assertTrue(currentThread.parent.compareTo(this) != 0);
 
 		parent = currentThread;
+		currentThread.child = this;
 		parent.sleep();
 
 		Machine.interrupt().enable();
@@ -452,6 +463,33 @@ public class KThread {
 		System.out.println("is it? " + (child1.status == statusFinished));
 		Lib.assertTrue((child1.status == statusFinished), " Expected child1 to be finished.");
     }
+	private static void joinTest2 () {
+		KThread child2 = new KThread( new Runnable () {
+			public void run() {
+				System.out.println(KThread.currentThread().getName() + " says hello world");
+			}
+			});
+		KThread child1 = new KThread( new Runnable () {
+			public void run() {
+				child2.setName("child2").fork();
+				child2.join();
+				System.out.println(KThread.currentThread().getName() + " says hello world");
+				Lib.assertTrue((child2.status == statusFinished), " Expected child1 to be finished.");
+			}
+			});
+		child1.setName("child1").fork();
+
+		child1.join();
+
+		for (int i = 0; i < 5; i++) {
+			System.out.println ("busy...");
+			KThread.currentThread().yield();
+		}
+
+		System.out.println("After joining, child1 should be finished.");
+		System.out.println("is it? " + (child1.status == statusFinished));
+		Lib.assertTrue((child1.status == statusFinished), " Expected child1 to be finished.");
+	}
 	/**
 	 * Tests whether this module is working.
 	 */
