@@ -317,7 +317,7 @@ public class KThread {
 
 		parent = currentThread;
 		currentThread.child = this;
-		parent.sleep();
+		// parent.sleep();
 
 		Machine.interrupt().enable();
 	}
