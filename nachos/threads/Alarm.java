@@ -97,6 +97,7 @@ public class Alarm {
 			return true;
 		}
 		else {
+			System.out.println("thread " + thread.getName()+ " not found");
 			lock.release();
 			return false;
 		}
