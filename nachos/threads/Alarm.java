@@ -149,9 +149,9 @@ public class Alarm {
 		KThread.currentThread().yield();
 		System.out.println("Main thread runs");
 		ThreadedKernel.alarm.cancel(child1);
-		// System.out.println("Main thread cancel child 1 alarm");
-		// child1.join();
-		// System.out.println("done all");
+		System.out.println("Main thread cancel child 1 alarm");
+		child1.join();
+		System.out.println("done all");
 	}
     // Implement more test methods here ...
 
