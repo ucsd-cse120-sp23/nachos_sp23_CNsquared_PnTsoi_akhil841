@@ -302,12 +302,12 @@ public class KThread {
 		Lib.assertTrue(currentThread.child == null);
 		Lib.assertTrue(this.parent == null);
 		
-		// KThread temp = this.child;
+		KThread temp = this.child;
 
-		// while(temp != null) {
-		// 	Lib.assertTrue(temp.compareTo(currentThread) != 0);
-		// 	temp = temp.child;
-		// }
+		while(temp != null) {
+			Lib.assertTrue(temp.compareTo(currentThread) != 0);
+			temp = temp.child;
+		}
 		// if(currentThread.child != null) {
 		// 	Lib.assertTrue(currentThread.child.child.compareTo(currentThread) != 0 );
 		// }
@@ -316,7 +316,7 @@ public class KThread {
 		// 	Lib.assertTrue(currentThread.parent.compareTo(this) != 0);
 
 		parent = currentThread;
-		// currentThread.child = this;
+		currentThread.child = this;
 		parent.sleep();
 
 		Machine.interrupt().enable();
