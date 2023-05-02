@@ -51,7 +51,7 @@ public class ThreadedKernel extends Kernel {
 		// SynchList.selfTest();
 		// Alarm.selfTest();
 		// Condition2.selfTest();
-		// Condition2.cvTest5();
+		Condition2.cvTest5();
 		// Rendezvous.selfTest();
 
 
