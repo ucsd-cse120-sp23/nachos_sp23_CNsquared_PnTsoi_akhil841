@@ -2,6 +2,8 @@ package nachos.threads;
 
 import nachos.machine.*;
 
+import java.util.Map;
+import java.util.TreeMap;
 /**
  * Uses the hardware timer to provide preemption, and to allow threads to sleep
  * until a certain time.
@@ -14,6 +16,9 @@ public class Alarm {
 	 * <p>
 	 * <b>Note</b>: Nachos will not function correctly with more than one alarm.
 	 */
+
+	private TreeMap<Long, KThread> sleptThreadQueue = new TreeMap<Long, KThread>();
+
 	public Alarm() {
 		Machine.timer().setInterruptHandler(new Runnable() {
 			public void run() {
@@ -29,7 +34,13 @@ public class Alarm {
 	 * should be run.
 	 */
 	public void timerInterrupt() {
-		KThread.currentThread().yield();
+		// KThread.currentThread().yield();
+		long currentTime = Machine.timer().getTime();
+
+		while(!sleptThreadQueue.isEmpty() && currentTime >= sleptThreadQueue.firstKey()) {
+			KThread nextAwKThread = sleptThreadQueue.pollFirstEntry().getValue();
+			nextAwKThread.ready();
+		}
 	}
 
 	/**
@@ -46,9 +57,18 @@ public class Alarm {
 	 */
 	public void waitUntil(long x) {
 		// for now, cheat just to get something working (busy waiting is bad)
+		Machine.interrupt().disable();
+		lock.acquire();
+		
+		if(x <= 0) return;
 		long wakeTime = Machine.timer().getTime() + x;
-		while (wakeTime > Machine.timer().getTime())
-			KThread.yield();
+		sleptThreadQueue.put(wakeTime, KThread.currentThread());
+		KThread.currentThread().sleep();
+
+		lock.release();
+		Machine.interrupt().enable();	
+		// while (wakeTime > Machine.timer().getTime())
+		// 	KThread.yield();
 	}
 
         /**
@@ -60,7 +80,45 @@ public class Alarm {
 	 * <p>
 	 * @param thread the thread whose timer should be cancelled.
 	 */
-        public boolean cancel(KThread thread) {
-		return false;
+	public boolean cancel(KThread thread) {
+		lock.acquire();
+
+		if(sleptThreadQueue.containsValue(thread)) {
+			for(Map.Entry<Long, KThread> entry : sleptThreadQueue.entrySet()) {
+				if(entry.getValue() == thread) {
+					sleptThreadQueue.remove(entry.getKey());
+					lock.release();
+					return true;
+				}
+			}
+			lock.release();
+			return true;
+		}
+		else {
+			lock.release();
+			return false;
+		}
 	}
+
+    public static void alarmTest0() {
+		int durations[] = {999, -10*1000, 100*1000, 0};
+		long t0, t1;
+
+		for (int d : durations) {
+			t0 = Machine.timer().getTime();
+			ThreadedKernel.alarm.waitUntil (d);
+			t1 = Machine.timer().getTime();
+			System.out.println ("alarmTest0: waited for " + (t1 - t0) + " ticks");
+		}
+    }
+
+    // Implement more test methods here ...
+
+    // Invoke Alarm.selfTest() from ThreadedKernel.selfTest()
+    public static void selfTest() {
+		alarmTest0();
+	// Invoke your other test methods here ...
+    }
+
+	final Lock lock = new Lock();
 }
