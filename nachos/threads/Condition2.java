@@ -53,7 +53,7 @@ public class Condition2 {
 		Lib.assertTrue(conditionLock.isHeldByCurrentThread());
 		if(!waitQueue.isEmpty()) {
 			KThread wokeThread = ((KThread) waitQueue.removeFirst());
-            if(!ThreadedKernel.alarm.cancel(wokeThread)) return;
+            ThreadedKernel.alarm.cancel(wokeThread);
             // System.out.println("wake "+wokeThread.getName());
             wokeThread.ready();
         }
