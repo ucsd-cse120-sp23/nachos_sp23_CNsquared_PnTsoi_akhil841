@@ -545,63 +545,57 @@ public class KThread {
 		System.out.println("is it? " + (child1.status == statusFinished));
 		Lib.assertTrue((child1.status == statusFinished), " Expected child1 to be finished.");
 	}
-	private static void joinTest4 () {
-		//having two thread sequences that are joining on each of their child
-		KThread child1, child2, child3, child4;
-		child4 = new KThread( new Runnable () {
-			public void run() {
-				System.out.println(KThread.currentThread().getName() + " says hello world");
-				try {
-					child1.join();
-				}
-				catch(Exception e) {
-					System.out.println("Exception caught");
-				}
-			}
-			});
-		child3 = new KThread( new Runnable () {
-			public void run() {
-				child4.setName("child4").fork();
-				child4.join();
-				System.out.println(KThread.currentThread().getName() + " says hello world");
-				System.out.println("After joining, child4 should be finished.");
-				System.out.println("is it? " + (child4.status == statusFinished));
-				Lib.assertTrue((child4.status == statusFinished), " Expected child4 to be finished.");
-			}
-			});
-		child2 = new KThread( new Runnable () {
-			public void run() {
-				child3.join();
-				System.out.println(KThread.currentThread().getName() + " says hello world");
-				System.out.println("After joining, child3 should be finished.");
-				System.out.println("is it? " + (child3.status == statusFinished));
-				Lib.assertTrue((child3.status == statusFinished), " Expected child3 to be finished.");
-			}
-			});
-		child1 = new KThread( new Runnable () {
-			public void run() {
-				child2.setName("child2").fork();
-				child2.join();
-				System.out.println(KThread.currentThread().getName() + " says hello world");
-				System.out.println("After joining, child2 should be finished.");
-				System.out.println("is it? " + (child2.status == statusFinished));
-				Lib.assertTrue((child2.status == statusFinished), " Expected child2 to be finished.");
-			}
-			});
-		child1.setName("child1").fork();
-		child3.setName("child3").fork();
-		child1.join();
-		child3.join();
+	// private static void joinTest4 () {
+	// 	//having two thread sequences that are joining on each of their child
+	// 	KThread child1, child2, child3, child4;
+	// 	child4 = new KThread( new Runnable () {
+	// 		public void run() {
+	// 			System.out.println(KThread.currentThread().getName() + " says hello world");
+	// 		}
+	// 		});
+	// 	child3 = new KThread( new Runnable () {
+	// 		public void run() {
+	// 			child4.setName("child4").fork();
+	// 			child4.join();
+	// 			System.out.println(KThread.currentThread().getName() + " says hello world");
+	// 			System.out.println("After joining, child4 should be finished.");
+	// 			System.out.println("is it? " + (child4.status == statusFinished));
+	// 			Lib.assertTrue((child4.status == statusFinished), " Expected child4 to be finished.");
+	// 		}
+	// 		});
+	// 	child2 = new KThread( new Runnable () {
+	// 		public void run() {
+	// 			child3.join();
+	// 			System.out.println(KThread.currentThread().getName() + " says hello world");
+	// 			System.out.println("After joining, child3 should be finished.");
+	// 			System.out.println("is it? " + (child3.status == statusFinished));
+	// 			Lib.assertTrue((child3.status == statusFinished), " Expected child3 to be finished.");
+	// 		}
+	// 		});
+	// 	child1 = new KThread( new Runnable () {
+	// 		public void run() {
+	// 			child2.setName("child2").fork();
+	// 			child2.join();
+	// 			System.out.println(KThread.currentThread().getName() + " says hello world");
+	// 			System.out.println("After joining, child2 should be finished.");
+	// 			System.out.println("is it? " + (child2.status == statusFinished));
+	// 			Lib.assertTrue((child2.status == statusFinished), " Expected child2 to be finished.");
+	// 		}
+	// 		});
+	// 	child1.setName("child1").fork();
+	// 	child3.setName("child3").fork();
+	// 	child1.join();
+	// 	child3.join();
 
-		for (int i = 0; i < 5; i++) {
-			System.out.println ("busy...");
-			KThread.currentThread().yield();
-		}
+	// 	for (int i = 0; i < 5; i++) {
+	// 		System.out.println ("busy...");
+	// 		KThread.currentThread().yield();
+	// 	}
 
-		System.out.println("After joining, child1 should be finished.");
-		System.out.println("is it? " + (child1.status == statusFinished));
-		Lib.assertTrue((child1.status == statusFinished), " Expected child1 to be finished.");
-	}
+	// 	System.out.println("After joining, child1 should be finished.");
+	// 	System.out.println("is it? " + (child1.status == statusFinished));
+	// 	Lib.assertTrue((child1.status == statusFinished), " Expected child1 to be finished.");
+	// }
 	/**
 	 * Tests whether this module is working.
 	 */
@@ -612,8 +606,8 @@ public class KThread {
 		new PingTest(0).run();
 		// joinTest1();
 		// joinTest2();
-		// joinTest3();
-		joinTest4();
+		joinTest3();
+		// joinTest4();
 	}
 
 	private static final char dbgThread = 't';
