@@ -148,6 +148,7 @@ public class Alarm {
 		child1.fork();
 		System.out.println("Main thread sleep");
 		KThread.currentThread().yield();
+		System.out.println("Main thread runs");
 		ThreadedKernel.alarm.cancel(child1);
 		System.out.println("Main thread cancel child 1 alarm");
 	}
