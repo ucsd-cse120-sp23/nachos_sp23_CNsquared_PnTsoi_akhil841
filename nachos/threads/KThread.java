@@ -496,9 +496,29 @@ public class KThread {
 	}
 
 	private static void joinTest3 () {
+		//having two thread sequences that are joining on each of their child
+		KThread child4 = new KThread( new Runnable () {
+			public void run() {
+				System.out.println(KThread.currentThread().getName() + " says hello world");
+			}
+			});
+		KThread child3 = new KThread( new Runnable () {
+			public void run() {
+				child4.setName("child4").fork();
+				child4.join();
+				System.out.println(KThread.currentThread().getName() + " says hello world");
+				System.out.println("After joining, child4 should be finished.");
+				System.out.println("is it? " + (child4.status == statusFinished));
+				Lib.assertTrue((child4.status == statusFinished), " Expected child2 to be finished.");
+			}
+			});
 		KThread child2 = new KThread( new Runnable () {
 			public void run() {
 				System.out.println(KThread.currentThread().getName() + " says hello world");
+				child3.join();
+				System.out.println("After joining, child3 should be finished.");
+				System.out.println("is it? " + (child3.status == statusFinished));
+				Lib.assertTrue((child3.status == statusFinished), " Expected child3 to be finished.");
 			}
 			});
 		KThread child1 = new KThread( new Runnable () {
@@ -512,8 +532,9 @@ public class KThread {
 			}
 			});
 		child1.setName("child1").fork();
-
+		child3.setName("child3").fork();
 		child1.join();
+		child3.join();
 
 		for (int i = 0; i < 5; i++) {
 			System.out.println ("busy...");
