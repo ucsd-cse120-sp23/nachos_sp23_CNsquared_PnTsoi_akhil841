@@ -49,12 +49,12 @@ public class Condition2 {
 	 */
 	public void wake() {
 		boolean intStatus = Machine.interrupt().disable();
-        System.out.println("wake");
+        // System.out.println("wake");
 		Lib.assertTrue(conditionLock.isHeldByCurrentThread());
 		if(!waitQueue.isEmpty()) {
 			KThread wokeThread = ((KThread) waitQueue.removeFirst());
             if(!ThreadedKernel.alarm.cancel(wokeThread)) return;
-            System.out.println("wake "+wokeThread.getName());
+            // System.out.println("wake "+wokeThread.getName());
             wokeThread.ready();
         }
 
@@ -93,7 +93,7 @@ public class Condition2 {
             public void run () {
                 lock.acquire();
                 for (int i = 0; i < 10; i++) {
-                    System.out.println(KThread.currentThread().getName());
+                    // System.out.println(KThread.currentThread().getName());
                     cv.wake();   // signal
                     cv.sleep();  // wait
                 }
