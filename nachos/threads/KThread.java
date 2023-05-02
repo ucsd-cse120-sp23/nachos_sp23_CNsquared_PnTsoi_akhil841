@@ -500,7 +500,8 @@ public class KThread {
 
 		new KThread(new PingTest(1)).setName("forked thread").fork();
 		new PingTest(0).run();
-		joinTest1();
+		// joinTest1();
+		joinTest2();
 	}
 
 	private static final char dbgThread = 't';
