@@ -81,7 +81,7 @@ public class Alarm {
 	 * @param thread the thread whose timer should be cancelled.
 	 */
 	public boolean cancel(KThread thread) {
-		lock.acquire();
+		Boolean intStatus = Machine.interrupt().disable();
 
 		if(sleptThreadQueue.containsValue(thread)) {
 			System.out.println("Cancel thread " + thread.getName());
@@ -89,16 +89,16 @@ public class Alarm {
 				if(entry.getValue() == thread) {
 					sleptThreadQueue.remove(entry.getKey());
 					System.out.println("found thread " + thread.getName());
-					lock.release();
+					Machine.interrupt().restore(intStatus);
 					return true;
 				}
 			}
-			lock.release();
+			Machine.interrupt().restore(intStatus);
 			return true;
 		}
 		else {
 			System.out.println("thread " + thread.getName()+ " not found");
-			lock.release();
+			Machine.interrupt().restore(intStatus);
 			return false;
 		}
 	}
