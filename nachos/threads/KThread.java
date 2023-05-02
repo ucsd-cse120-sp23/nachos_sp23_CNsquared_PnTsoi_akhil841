@@ -513,6 +513,6 @@ public class KThread {
 
 	private static KThread idleThread = null;
 
-	public static KThread parent = null;
-	public static KThread child = null;
+	public KThread parent = null;
+	public KThread child = null;
 }
