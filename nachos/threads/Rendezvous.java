@@ -43,6 +43,7 @@ public class Rendezvous {
             ( (Condition) list.get(0)).sleep();
             rLock.release();
             list = map.get(tag);
+            map.remove(tag);
             return (Integer)list.get(2);
         }
         else{
@@ -52,7 +53,7 @@ public class Rendezvous {
         }
 
         rLock.release();
-        map.remove(tag);
+        // map.remove(tag);
         return (Integer) list.get(1);
     }
     // Place Rendezvous test code inside of the Rendezvous class.
