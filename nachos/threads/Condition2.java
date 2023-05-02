@@ -199,13 +199,13 @@ public class Condition2 {
         consumer.setName("consumer");
         consumer.fork();
         cv.sleepFor(200000);
+        lock.release();
         consumer.join();
         
         // no other thread will wake us up, so we should time out
         long t1 = Machine.timer().getTime();
         System.out.println(KThread.currentThread().getName() +
                            " woke up, slept for " + (t1 - t0) + " ticks");
-        lock.release();
     }
 
     public static void selfTest() {
