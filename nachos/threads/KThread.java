@@ -206,8 +206,8 @@ public class KThread {
 		if(currentThread.parent != null)
 			currentThread.parent.ready();
 		
-		currentThread.parent = null;
 		currentThread.parent.child = null;
+		currentThread.parent = null;
 		currentThread.child = null;
 		sleep();
 
