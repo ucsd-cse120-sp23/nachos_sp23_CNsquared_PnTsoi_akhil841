@@ -206,10 +206,10 @@ public class Condition2 {
 
             KThread producer = new KThread( new Runnable () {
                     public void run() {
-                        lock.acquire();
+                        // lock.acquire();
                         cv.wake();
                         
-                        lock.release();
+                        // lock.release();
                     }
                 });
 
