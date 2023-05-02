@@ -57,16 +57,14 @@ public class Alarm {
 	 */
 	public void waitUntil(long x) {
 		// for now, cheat just to get something working (busy waiting is bad)
-		Machine.interrupt().disable();
-		lock.acquire();
+		Boolean intStatus = Machine.interrupt().disable();
 		
 		if(x <= 0) return;
 		long wakeTime = Machine.timer().getTime() + x;
 		sleptThreadQueue.put(wakeTime, KThread.currentThread());
 		KThread.currentThread().sleep();
 
-		lock.release();
-		Machine.interrupt().enable();	
+		Machine.interrupt().restore(intStatus);	
 		// while (wakeTime > Machine.timer().getTime())
 		// 	KThread.yield();
 	}
@@ -81,24 +79,24 @@ public class Alarm {
 	 * @param thread the thread whose timer should be cancelled.
 	 */
 	public boolean cancel(KThread thread) {
-		lock.acquire();
+		Boolean intStatus = Machine.interrupt().disable();
 
 		if(sleptThreadQueue.containsValue(thread)) {
-			// System.out.println("Cancel thread " + thread.getName());
+			System.out.println("Cancel thread " + thread.getName());
 			for(Map.Entry<Long, KThread> entry : sleptThreadQueue.entrySet()) {
 				if(entry.getValue() == thread) {
 					sleptThreadQueue.remove(entry.getKey());
-					// System.out.println("found thread " + thread.getName());
-					lock.release();
+					System.out.println("found thread " + thread.getName());
+					Machine.interrupt().restore(intStatus);
 					return true;
 				}
 			}
-			lock.release();
+			Machine.interrupt().restore(intStatus);
 			return true;
 		}
 		else {
-			// System.out.println("thread " + thread.getName()+ " not found");
-			lock.release();
+			System.out.println("thread " + thread.getName()+ " not found");
+			Machine.interrupt().restore(intStatus);
 			return false;
 		}
 	}
@@ -148,6 +146,7 @@ public class Alarm {
 		child1.fork();
 		System.out.println("Main thread sleep");
 		KThread.currentThread().yield();
+		System.out.println("Main thread runs");
 		ThreadedKernel.alarm.cancel(child1);
 		System.out.println("Main thread cancel child 1 alarm");
 	}
