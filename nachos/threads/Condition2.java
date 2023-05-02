@@ -74,7 +74,7 @@ public class Condition2 {
             wokeThread.ready();
         }
 
-		Machine.interrupt().restore(intStatus);
+		Machine.interrupt().enable();
 	}
 
         /**
