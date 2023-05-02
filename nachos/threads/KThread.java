@@ -203,10 +203,9 @@ public class KThread {
 		toBeDestroyed = currentThread;
 
 		currentThread.status = statusFinished;
-		if(parent != null)
-			parent.ready();
-		parent = null;
-		child = null;
+		if(currentThread.parent != null)
+			currentThread.parent.ready();
+		currentThread.parent = null;
 		currentThread.child = null;
 		sleep();
 
