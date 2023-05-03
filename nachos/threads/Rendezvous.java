@@ -41,9 +41,9 @@ public class Rendezvous {
             list.add(value);
             map.put(tag, list);
             ( (Condition) list.get(0)).sleep();
-            rLock.release();
             list = map.get(tag);
             map.remove(tag);
+            rLock.release();
             return (Integer)list.get(2);
         }
         else{
