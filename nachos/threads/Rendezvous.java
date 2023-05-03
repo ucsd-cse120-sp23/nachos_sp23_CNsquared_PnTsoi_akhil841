@@ -102,7 +102,50 @@ public class Rendezvous {
 	// assumes join is implemented correctly
 	t1.join();  t3.join();
     }
+    public static void rendezTest2() {
+	final Rendezvous r = new Rendezvous();
 
+	KThread t1 = new KThread( new Runnable () {
+		public void run() {
+		    int tag = 0;
+		    int send = -1;
+
+		    System.out.println ("Thread " + KThread.currentThread().getName() + " exchanging " + send);
+		    int recv = r.exchange (tag, send);
+		    Lib.assertTrue (recv == 2, "Was expecting " + 2 + " but received " + recv);
+		    System.out.println ("Thread " + KThread.currentThread().getName() + " received " + recv);
+		}
+	    });
+	t1.setName("t1");
+	KThread t2 = new KThread( new Runnable () {
+		public void run() {
+		    int tag = 0;
+		    int send = 1;
+
+		    System.out.println ("Thread " + KThread.currentThread().getName() + " exchanging " + send);
+		    int recv = r.exchange (tag, send);
+		    Lib.assertTrue (recv == -1, "Was expecting " + -1 + " but received " + recv);
+		    System.out.println ("Thread " + KThread.currentThread().getName() + " received " + recv);
+		}
+	    });
+	KThread t3 = new KThread( new Runnable () {
+		public void run() {
+		    int tag = 0;
+		    int send = 2;
+
+		    System.out.println ("Thread " + KThread.currentThread().getName() + " exchanging " + send);
+		    int recv = r.exchange (tag, send);
+		    Lib.assertTrue (recv == -1, "Was expecting " + -1 + " but received " + recv);
+		    System.out.println ("Thread " + KThread.currentThread().getName() + " received " + recv);
+		}
+	    });
+	t2.setName("t2");
+    t3.setName("t3");
+
+	t1.fork(); t2.fork(); t3.fork();
+	// assumes join is implemented correctly
+	t1.join();  t3.join();
+    }
     // Invoke Rendezvous.selfTest() from ThreadedKernel.selfTest()
 
     public static void selfTest() {

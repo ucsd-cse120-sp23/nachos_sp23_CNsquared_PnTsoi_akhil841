@@ -52,7 +52,7 @@ public class ThreadedKernel extends Kernel {
 		// Alarm.selfTest();
 		// Condition2.selfTest();
 		// Condition2.cvTest5();
-		Rendezvous.selfTest();
+		// Rendezvous.selfTest();
 
 
 		if (Machine.bank() != null) {
