@@ -374,6 +374,85 @@ public class UserProcess {
 		return 0;
 	}
 
+	private int handleCreate(int naddr)
+	{
+		//check for nullptr
+		if (naddr == 0)
+			return -1;
+		//get file name (must be 256 bytes or less)
+		String fname = readVirtualMemoryString(naddr, 256);
+		int fileIdx = fileIndexLinearSearch();
+		if (fileIdx != -1)
+		{
+			OpenFile newFile = ThreadedKernel.fileSystem.open(fname, true);
+			files[fileIdx] = newFile;
+			return fileIdx;
+		}
+		else
+		{
+			Lib.debug(dbgProcess, "Max open files reached; cannot create a new file");
+			return -1;
+		}
+	}
+
+	private int handleUnlink(int naddr)
+	{
+		//check for nullptr
+		if (naddr == 0)
+			return -1;
+		//get file name (must be 256 bytes or less)
+		String fname = readVirtualMemoryString(naddr, 256);
+		boolean successful = ThreadedKernel.fileSystem.remove(fname);
+		if (!successful)
+			return -1;
+		//clear spot in file table if needed
+		int idx = fileIndexNameLinearSearch(fname);
+		if (idx != -1)
+			files[idx] = null;
+		return 0;
+	}
+
+	private int handleOpen(String name){
+
+        OpenFile returned = ThreadedKernel.fileSystem.open(name, false);
+        
+        if(returned == null){
+            Lib.debug(dbgProcess, name + " not able to be opened");
+            
+            return -1;
+        }
+
+
+        int filesIndex = fileIndexLinearSearch();
+        //There was no space for it in the table
+        if(filesIndex == -1){
+            Lib.debug(dbgProcess,  "No space for " + name);
+            return -1;
+        }	
+    
+        return filesIndex;
+    }
+
+	private int handleClose(int fileDescriptor){
+        if(fileDescriptor < 0 || fileDescriptor >= 16){
+            Lib.debug(dbgProcess, "Invalid file Descriptor");
+            return -1;
+        }
+
+        OpenFile file = files[fileDescriptor];
+
+        if(files[fileDescriptor] == null){
+            Lib.debug(dbgProcess, "Invalid file Descriptor");
+            return -1;
+        }
+
+        file.close();
+
+        files[fileDescriptor] = null;
+
+        return -1;
+    }
+
 	private static final int syscallHalt = 0, syscallExit = 1, syscallExec = 2,
 			syscallJoin = 3, syscallCreate = 4, syscallOpen = 5,
 			syscallRead = 6, syscallWrite = 7, syscallClose = 8,
@@ -446,6 +525,14 @@ public class UserProcess {
 			return handleHalt();
 		case syscallExit:
 			return handleExit(a0);
+		case syscallCreate:
+			return handleCreate(a0);
+		case syscallUnlink:
+			return handleUnlink(a0);
+		case syscallOpen:
+            return handleOpen(readVirtualMemoryString(a0, 256));
+        case syscallClose:
+            return handleClose(a0);
 
 		default:
 			Lib.debug(dbgProcess, "Unknown syscall " + syscall);
@@ -482,6 +569,22 @@ public class UserProcess {
 		}
 	}
 
+	private int fileIndexLinearSearch()
+	{
+		for (int i = 0; i < MAX_FILES; i++)
+			if (files[i] == null)
+				return i;
+		return -1;
+	}
+
+	private int fileIndexNameLinearSearch(String name)
+	{
+		for (int i = 0; i < MAX_FILES; i++)
+			if (files[i].getName().equals(name))
+				return i;
+		return -1;
+	}
+
 	/** The program being run by this process. */
 	protected Coff coff;
 
@@ -504,4 +607,10 @@ public class UserProcess {
 	private static final int pageSize = Processor.pageSize;
 
 	private static final char dbgProcess = 'a';
+
+	private final int MAX_FILES = 16;
+
+	private OpenFile[] files = new OpenFile[MAX_FILES];
+
+	private int fileIdx = 0;
 }
