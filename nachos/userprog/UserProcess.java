@@ -26,6 +26,7 @@ public class UserProcess {
 	public UserProcess() {
 		int numPhysPages = Machine.processor().getNumPhysPages();
 		pageTable = new TranslationEntry[numPhysPages];
+		files = new OpenFile[16];
 		for (int i = 0; i < numPhysPages; i++)
 			pageTable[i] = new TranslationEntry(i, i, true, false, false, false);
 	}
@@ -373,6 +374,115 @@ public class UserProcess {
 
 		return 0;
 	}
+	
+	private int handleCreate(int naddr)	{
+		//check for nullptr
+		if (naddr == 0)
+			return -1;
+		//get file name (must be 256 bytes or less)
+		String fname = readVirtualMemoryString(naddr, 256);
+		int fileIdx = fileIndexLinearSearch();
+		if (fileIdx != -1)
+		{
+			OpenFile newFile = ThreadedKernel.fileSystem.open(fname, true);
+			files[fileIdx] = newFile;
+			return fileIdx;
+		}
+		else
+		{
+			Lib.debug(dbgProcess, "Max open files reached; cannot create a new file");
+			return -1;
+		}
+	}
+	private int handleUnlink(int naddr){
+		//check for nullptr
+		if (naddr == 0)
+			return -1;
+		//get file name (must be 256 bytes or less)
+		String fname = readVirtualMemoryString(naddr, 256);
+		boolean successful = ThreadedKernel.fileSystem.remove(fname);
+		if (!successful)
+			return -1;
+		//clear spot in file table if needed
+		int idx = fileIndexNameLinearSearch(fname);
+		if (idx != -1)
+			files[idx] = null;
+		return 0;
+	}
+		
+	private int fileIndexLinearSearch(){
+		for (int i = 0; i < 16; i++)
+			if (files[i] == null)
+				return i;
+		return -1;
+	}
+	
+	private int fileIndexNameLinearSearch(String name){
+		for (int i = 0; i < 16; i++)
+			if (files[i].getName().equals(name))
+				return i;
+		return -1;
+	}
+
+	
+	private int handleOpen(String name){
+
+		OpenFile returned = ThreadedKernel.fileSystem.open(name, false);
+		
+		if(returned == null){
+			Lib.debug(dbgProcess, name + " not able to be opened");
+			
+			return -1;
+		}
+
+
+		int filesIndex = findOpenTableIndex();
+		//There was no space for it in the table
+		if(filesIndex == -1){
+			Lib.debug(dbgProcess,  "No space for " + name);
+			return -1;
+		}
+	
+		return filesIndex;
+	}
+
+	private int findOpenTableIndex(){
+
+		for (int i = 0; i < files.length; i++) {
+			if(files[i] == null){
+				return i;
+			}
+		}
+
+		return -1;
+	}
+
+	/**
+	 * Close a file descriptor, so that it no longer refers to any file or
+	 * stream and may be reused. The resources associated with the file
+	 * descriptor are released.
+	 *
+	 * Returns 0 on success, or -1 if an error occurred.
+	 */
+	private int handleClose(int fileDescriptor){
+		if(fileDescriptor < 0 || fileDescriptor >= 16){
+			Lib.debug(dbgProcess, "Invalid file Descriptor");
+			return -1;
+		}
+
+		OpenFile file = files[fileDescriptor];
+
+		if(files[fileDescriptor] == null){
+			Lib.debug(dbgProcess, "Invalid file Descriptor");
+			return -1;
+		}
+
+		file.close();
+
+		files[fileDescriptor] = null;
+
+		return -1;
+	}
 
 	private static final int syscallHalt = 0, syscallExit = 1, syscallExec = 2,
 			syscallJoin = 3, syscallCreate = 4, syscallOpen = 5,
@@ -481,6 +591,9 @@ public class UserProcess {
 			Lib.assertNotReached("Unexpected exception");
 		}
 	}
+	/** Array of file descriptors to OpenFile Objects */
+	protected OpenFile[] files;
+
 
 	/** The program being run by this process. */
 	protected Coff coff;
