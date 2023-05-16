@@ -392,7 +392,7 @@ public class UserProcess {
 		while (count > 0) {
 			int bytesToRead = Math.min(count, 256);
 			bytesRead = file.read(buffer, offset, bytesToRead);
-			if (bytesRead == -1) return totalBytesRead;
+			if (bytesRead == -1 || bytesRead == 0) return totalBytesRead;
 			int bytesWritten = writeVirtualMemory(vaddr, buffer, offset, bytesRead);
 			if(bytesWritten == -1) return -1;
 			if(bytesWritten != bytesRead) return totalBytesRead;
@@ -429,6 +429,7 @@ public class UserProcess {
 			offset += bytesRead;
 			vaddr += bytesRead;
 			totalBytesWrite += bytesWritten;
+			if(bytesRead == 0) break;
 		}
 
 		return totalBytesWrite;
