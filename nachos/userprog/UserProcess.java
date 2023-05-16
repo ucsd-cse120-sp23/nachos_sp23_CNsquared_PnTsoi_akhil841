@@ -27,6 +27,8 @@ public class UserProcess {
 		int numPhysPages = Machine.processor().getNumPhysPages();
 		pageTable = new TranslationEntry[numPhysPages];
 		files = new OpenFile[16];
+		files[0] = UserKernel.console.openForReading();
+		files[1] = UserKernel.console.openForWriting();
 		for (int i = 0; i < numPhysPages; i++)
 			pageTable[i] = new TranslationEntry(i, i, true, false, false, false);
 	}
@@ -375,6 +377,13 @@ public class UserProcess {
 		return 0;
 	}
 
+	private int handleExec(String programName, int argc, int ptrArray) {
+		if(programName == null) return -1;
+		if(argc < 0) return -1;
+
+		return 0;
+	}
+
 	private int handleRead(int fileDescriptor, int vaddr, int count) {
 		//check for invalid file descriptor
 		if (fileDescriptor < 0 || fileDescriptor >= 16) return -1;
@@ -469,7 +478,7 @@ public class UserProcess {
 	}
 		
 	private int fileIndexLinearSearch(){
-		for (int i = 0; i < 16; i++)
+		for (int i = 2; i < 16; i++)
 			if (files[i] == null)
 				return i;
 		return -1;
@@ -610,6 +619,8 @@ public class UserProcess {
 	 */
 	public int handleSyscall(int syscall, int a0, int a1, int a2, int a3) {
 		switch (syscall) {
+		case syscallExec:
+			return handleExec(readVirtualMemoryString(a0, 256), a1, a2);
 		case syscallWrite:
 			return handleWrite(a0, a1, a2);
 		case syscallRead:
