@@ -424,7 +424,6 @@ public class UserProcess {
 			bytesRead = readVirtualMemory(vaddr, buffer, offset, bytesToRead);
 			if (bytesRead == -1) return -1;
 			int bytesWritten = file.write(buffer, offset, bytesRead);
-			if(bytesWritten == -1) return -1;
 			if(bytesWritten != bytesRead) return -1;
 			count -= bytesRead;
 			offset += bytesRead;
@@ -630,7 +629,7 @@ public class UserProcess {
 
 		default:
 			Lib.debug(dbgProcess, "Unknown syscall " + syscall);
-			Lib.assertNotReached("Unknown system call!");
+			Lib.assertNotReached("Unknown system call!" + syscall);
 		}
 		return 0;
 	}
