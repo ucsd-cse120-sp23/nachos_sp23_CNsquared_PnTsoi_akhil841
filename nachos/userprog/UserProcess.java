@@ -614,7 +614,7 @@ public class UserProcess {
 			return handleWrite(a0, a1, a2);
 		case syscallRead:
 			return handleRead(a0, a1, a2);	
-		case 4:
+		case syscallCreate:
 			return handleCreate(a0);
 		case syscallClose:
 			return handleClose(a0);
