@@ -430,7 +430,6 @@ public class UserProcess {
 
 		while (count > 0) {
 			int bytesToRead = Math.min(count, 256);
-			System.out.println("stuck");
 			bytesRead = readVirtualMemory(vaddr, buffer, offset, bytesToRead);
 			if (bytesRead == -1 || bytesRead == 0) return -1;
 			int bytesWritten = file.write(buffer, offset, bytesRead);
