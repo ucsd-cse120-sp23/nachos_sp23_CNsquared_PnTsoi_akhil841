@@ -374,7 +374,66 @@ public class UserProcess {
 
 		return 0;
 	}
+
+	private int handleRead(int fileDescriptor, int vaddr, int count) {
+		//check for invalid file descriptor
+		if (fileDescriptor < 0 || fileDescriptor >= 16) return -1;
+		//check for invalid count
+		if (count < 0) return -1;
+		if(files[fileDescriptor] == null) return -1;
+		//read from file
+		//initialize buffer
+		byte[] buffer = new byte[256];
+		int offset = 0;
+		int bytesRead = 0;
+		int totalBytesRead = 0;
+		OpenFile file = files[fileDescriptor];
+
+		while (count > 0) {
+			int bytesToRead = Math.min(count, 256);
+			bytesRead = file.read(buffer, offset, bytesToRead);
+			if (bytesRead == -1) return totalBytesRead;
+			int bytesWritten = writeVirtualMemory(vaddr, buffer, offset, bytesRead);
+			if(bytesWritten == -1) return -1;
+			if(bytesWritten != bytesRead) return totalBytesRead;
+			count -= bytesRead;
+			offset += bytesRead;
+			vaddr += bytesRead;
+			totalBytesRead += bytesWritten;
+		}
+
+		return totalBytesRead;
+	}
 	
+	private int handleWrite(int fileDescriptor, int vaddr, int count) {
+		//check for invalid file descriptor
+		if (fileDescriptor < 0 || fileDescriptor >= 16) return -1;
+		//check for invalid count
+		if (count < 0) return -1;
+		if(files[fileDescriptor] == null) return -1;
+		//read from file
+		//initialize buffer
+		byte[] buffer = new byte[256];
+		int offset = 0;
+		int bytesRead = 0;
+		int totalBytesWrite = 0;
+		OpenFile file = files[fileDescriptor];
+
+		while (count > 0) {
+			int bytesToRead = Math.min(count, 256);
+			bytesRead = readVirtualMemory(vaddr, buffer, offset, bytesToRead);
+			if (bytesRead == -1) return -1;
+			int bytesWritten = file.write(buffer, offset, bytesRead);
+			if(bytesWritten == -1) return -1;
+			if(bytesWritten != bytesRead) return -1;
+			count -= bytesRead;
+			offset += bytesRead;
+			vaddr += bytesRead;
+			totalBytesWrite += bytesWritten;
+		}
+
+		return totalBytesWrite;
+	}
 	private int handleCreate(int naddr)	{
 		//check for nullptr
 		if (naddr == 0)
@@ -552,6 +611,18 @@ public class UserProcess {
 	 */
 	public int handleSyscall(int syscall, int a0, int a1, int a2, int a3) {
 		switch (syscall) {
+		case syscallWrite:
+			return handleWrite(a0, a1, a2);
+		case syscallRead:
+			return handleRead(a0, a1, a2);	
+		case syscallCreate:
+			return handleCreate(a0);
+		case syscallClose:
+			return handleClose(a0);
+		case syscallOpen:
+			return handleOpen(readVirtualMemoryString(a0,256));
+		case syscallUnlink:
+			return handleUnlink(a0);
 		case syscallHalt:
 			return handleHalt();
 		case syscallExit:
