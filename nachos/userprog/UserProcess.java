@@ -153,7 +153,7 @@ public class UserProcess {
 	 * @return the number of bytes successfully transferred.
 	 */
 	public int readVirtualMemory(int vaddr, byte[] data, int offset, int length) {
-		Machine.interrupt().disable();
+		rwLock.acquire();
 		Lib.assertTrue(offset >= 0 && length >= 0
 				&& offset + length <= data.length);
 
@@ -171,7 +171,7 @@ public class UserProcess {
 			paddr = getPaddr(vaddr);
 			if (paddr < 0 || paddr >= memory.length)
 			{
-				Machine.interrupt().enable();
+				rwLock.release();
 				return -1;
 			}
 
@@ -186,7 +186,7 @@ public class UserProcess {
 			
 		}
 
-		Machine.interrupt().enable();
+		rwLock.release();
 		return amountCopied;
 	}
 
@@ -237,7 +237,7 @@ public class UserProcess {
 	 * @return the number of bytes successfully transferred.
 	 */
 	public int writeVirtualMemory(int vaddr, byte[] data, int offset, int length) {
-		Machine.interrupt().disable();
+		rwLock.acquire();
 		Lib.assertTrue(offset >= 0 && length >= 0
 				&& offset + length <= data.length);
 
@@ -254,7 +254,7 @@ public class UserProcess {
 			paddr = getPaddr(vaddr);
 			if (paddr < 0 || paddr >= memory.length || !validWrite(vaddr))
 			{
-				Machine.interrupt().enable();
+				rwLock.release();
 				return -1;
 			}
 
@@ -268,7 +268,7 @@ public class UserProcess {
 			vaddr += amount;
 			
 		}
-		Machine.interrupt().enable();
+		rwLock.release();
 		return amountWritten;
 	}
 
@@ -403,7 +403,7 @@ public class UserProcess {
 				}
 
 				//create translation entry from vpn to ppn 
-				pageTable[i] = new TranslationEntry(vpn, ppn, section.isReadOnly(), false, false, false);
+				pageTable[i] = new TranslationEntry(vpn, ppn,true, section.isReadOnly(), false, false);
 				section.loadPage(i, ppn);
 			}
 		}
@@ -933,5 +933,5 @@ public class UserProcess {
 
 	public static int freeProcessID = 1;
 
-	//private final Lock rwLock = new Lock();
+	private Lock rwLock;
 }
