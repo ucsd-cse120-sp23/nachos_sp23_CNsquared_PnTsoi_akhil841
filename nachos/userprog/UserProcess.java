@@ -26,8 +26,9 @@ public class UserProcess {
 	public UserProcess() {
 		int numPhysPages = Machine.processor().getNumPhysPages();
 		pageTable = new TranslationEntry[numPhysPages];
-		for (int i = 0; i < numPhysPages; i++)
-			pageTable[i] = new TranslationEntry(i, i, true, false, false, false);
+		files = new OpenFile[16];
+
+		
 	}
 
 	/**
@@ -147,15 +148,53 @@ public class UserProcess {
 
 		byte[] memory = Machine.processor().getMemory();
 
-		// for now, just assume that virtual addresses equal physical addresses
-		if (vaddr < 0 || vaddr >= memory.length)
-			return 0;
+		int paddr;
+		int amountCopied = 0;
 
-		int amount = Math.min(length, memory.length - vaddr);
-		System.arraycopy(memory, vaddr, data, offset, amount);
+		//loop for reading memory page by page
 
-		return amount;
+		while(amountCopied < length){
+
+			//get the physical address from virtual adresss
+			
+			paddr = getPaddr(vaddr);
+			if (paddr < 0 || paddr >= memory.length)
+				return amountCopied;
+
+	
+			//the amount that we read from this page is either the entire page( starting at the paddr) or the remainder of what we are supposed to copy
+			int amount = Math.min(length - amountCopied, pageSize - Processor.offsetFromAddress(paddr));
+			//writes it to the data 
+			System.arraycopy(memory, paddr, data, offset + amountCopied, amount);
+			amountCopied += amount;
+			//offsets the virtual address
+			vaddr += amount;
+			
+		}
+
+
+		return amountCopied;
 	}
+
+	private int getPaddr(int vaddr){;
+
+		int paddr = -1;
+
+		int vpn = Processor.pageFromAddress(vaddr);
+		int addrOffest = Processor.offsetFromAddress(vaddr);
+
+		if(vpn >= pageTable.length || vpn < 0){
+			return -1;
+		}
+		if(!pageTable[vpn].valid) return -1;
+		//pageTable[vpn].used = true;
+		int ppn = pageTable[vpn].ppn;
+		paddr = pageSize * ppn + addrOffest;
+
+		return paddr;
+		
+	}
+
 
 	/**
 	 * Transfer all data from the specified array to this process's virtual
@@ -189,14 +228,41 @@ public class UserProcess {
 
 		byte[] memory = Machine.processor().getMemory();
 
-		// for now, just assume that virtual addresses equal physical addresses
-		if (vaddr < 0 || vaddr >= memory.length)
-			return 0;
+		int amountWritten = 0;
+		int paddr;
 
-		int amount = Math.min(length, memory.length - vaddr);
-		System.arraycopy(data, offset, memory, vaddr, amount);
+		//loop for reading memory page by page
 
-		return amount;
+		while(amountWritten < length){
+
+			//get the physical address from virtual adresss
+			paddr = getPaddr(vaddr);
+			if (paddr < 0 || paddr >= memory.length || !validWrite(vaddr))
+				return amountWritten;
+
+	
+			//the amount that we write to this page is either the entire page( starting at the paddr) or the remainder of what we are supposed to write
+			int amount = Math.min(length - amountWritten, pageSize - Processor.offsetFromAddress(paddr));
+			//writes it to the data 
+			System.arraycopy(data, offset + amountWritten, memory, paddr, amount);
+			amountWritten += amount;
+			//offsets the virtual address
+			vaddr += amount;
+			
+		}
+
+		return amountWritten;
+	}
+
+
+	private boolean validWrite(int vaddr){
+
+		int vpn = Processor.pageFromAddress(vaddr);
+
+		if(vpn >= pageTable.length || vpn < 0){
+			return false;
+		}
+		return !pageTable[vpn].readOnly;
 	}
 
 	/**
@@ -294,6 +360,7 @@ public class UserProcess {
 	 * @return <tt>true</tt> if the sections were successfully loaded.
 	 */
 	protected boolean loadSections() {
+		
 		if (numPages > Machine.processor().getNumPhysPages()) {
 			coff.close();
 			Lib.debug(dbgProcess, "\tinsufficient physical memory");
@@ -310,8 +377,16 @@ public class UserProcess {
 			for (int i = 0; i < section.getLength(); i++) {
 				int vpn = section.getFirstVPN() + i;
 
-				// for now, just assume virtual addresses=physical addresses
-				section.loadPage(i, vpn);
+				//get availble physical page
+				int ppn = UserKernel.getPPN();
+				//if not return -1 
+				if(ppn == -1){
+					return false;
+				}
+
+				//create translation entry from vpn to ppn 
+				pageTable[i] = new TranslationEntry(vpn, ppn, section.isReadOnly(), false, false, false);
+				section.loadPage(i, ppn);
 			}
 		}
 
@@ -322,6 +397,15 @@ public class UserProcess {
 	 * Release any resources allocated by <tt>loadSections()</tt>.
 	 */
 	protected void unloadSections() {
+
+		//go through pagetable and free all of the physical pages
+		for(int i = 0; i < pageTable.length; i++){
+			TranslationEntry entry = pageTable[i];
+			UserKernel.freePPN(entry.ppn);
+
+			pageTable[i] = null;
+		}
+
 	}
 
 	/**
@@ -368,6 +452,10 @@ public class UserProcess {
 		// can grade your implementation.
 
 		Lib.debug(dbgProcess, "UserProcess.handleExit (" + status + ")");
+
+		//free up memory allocated
+		unloadSections();
+
 		// for now, unconditionally terminate with just one process
 		Kernel.kernel.terminate();
 
@@ -378,6 +466,114 @@ public class UserProcess {
 			syscallJoin = 3, syscallCreate = 4, syscallOpen = 5,
 			syscallRead = 6, syscallWrite = 7, syscallClose = 8,
 			syscallUnlink = 9;
+	private int handleCreate(int naddr)	{
+		//check for nullptr
+		if (naddr == 0)
+			return -1;
+		//get file name (must be 256 bytes or less)
+		String fname = readVirtualMemoryString(naddr, 256);
+		int fileIdx = fileIndexLinearSearch();
+		if (fileIdx != -1)
+		{
+			OpenFile newFile = ThreadedKernel.fileSystem.open(fname, true);
+			files[fileIdx] = newFile;
+			return fileIdx;
+		}
+		else
+		{
+			Lib.debug(dbgProcess, "Max open files reached; cannot create a new file");
+			return -1;
+		}
+	}
+	private int handleUnlink(int naddr){
+		//check for nullptr
+		if (naddr == 0)
+			return -1;
+		//get file name (must be 256 bytes or less)
+		String fname = readVirtualMemoryString(naddr, 256);
+		boolean successful = ThreadedKernel.fileSystem.remove(fname);
+		if (!successful)
+			return -1;
+		//clear spot in file table if needed
+		int idx = fileIndexNameLinearSearch(fname);
+		if (idx != -1)
+			files[idx] = null;
+		return 0;
+	}
+		
+	private int fileIndexLinearSearch(){
+		for (int i = 0; i < 16; i++)
+			if (files[i] == null)
+				return i;
+		return -1;
+	}
+	
+	private int fileIndexNameLinearSearch(String name){
+		for (int i = 0; i < 16; i++)
+			if (files[i].getName().equals(name))
+				return i;
+		return -1;
+	}
+
+	
+	private int handleOpen(String name){
+
+		OpenFile returned = ThreadedKernel.fileSystem.open(name, false);
+		
+		if(returned == null){
+			Lib.debug(dbgProcess, name + " not able to be opened");
+			
+			return -1;
+		}
+
+
+		int filesIndex = findOpenTableIndex();
+		//There was no space for it in the table
+		if(filesIndex == -1){
+			Lib.debug(dbgProcess,  "No space for " + name);
+			return -1;
+		}
+	
+		return filesIndex;
+	}
+
+	private int findOpenTableIndex(){
+
+		for (int i = 0; i < files.length; i++) {
+			if(files[i] == null){
+				return i;
+			}
+		}
+
+		return -1;
+	}
+
+	/**
+	 * Close a file descriptor, so that it no longer refers to any file or
+	 * stream and may be reused. The resources associated with the file
+	 * descriptor are released.
+	 *
+	 * Returns 0 on success, or -1 if an error occurred.
+	 */
+	private int handleClose(int fileDescriptor){
+		if(fileDescriptor < 0 || fileDescriptor >= 16){
+			Lib.debug(dbgProcess, "Invalid file Descriptor");
+			return -1;
+		}
+
+		OpenFile file = files[fileDescriptor];
+
+		if(files[fileDescriptor] == null){
+			Lib.debug(dbgProcess, "Invalid file Descriptor");
+			return -1;
+		}
+
+		file.close();
+
+		files[fileDescriptor] = null;
+
+		return -1;
+	}
 
 	/**
 	 * Handle a syscall exception. Called by <tt>handleException()</tt>. The
@@ -446,6 +642,10 @@ public class UserProcess {
 			return handleHalt();
 		case syscallExit:
 			return handleExit(a0);
+		case syscallOpen:
+			return handleOpen(readVirtualMemoryString(a0, 256));
+		case syscallClose:
+			return handleClose(a0);
 
 		default:
 			Lib.debug(dbgProcess, "Unknown syscall " + syscall);
@@ -481,6 +681,10 @@ public class UserProcess {
 			Lib.assertNotReached("Unexpected exception");
 		}
 	}
+
+	/** Array of file descriptors to OpenFile Objects */
+	protected OpenFile[] files;
+
 
 	/** The program being run by this process. */
 	protected Coff coff;
