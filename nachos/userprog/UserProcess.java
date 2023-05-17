@@ -617,6 +617,9 @@ public class UserProcess {
 		int fileIdx = fileIndexLinearSearch();
 		if (fileIdx != -1)
 		{
+			//remove file if it exists
+			ThreadedKernel.fileSystem.remove(fname);
+			//create new file
 			OpenFile newFile = ThreadedKernel.fileSystem.open(fname, true);
 			files[fileIdx] = newFile;
 			return fileIdx;
@@ -884,13 +887,6 @@ public class UserProcess {
 	}
 	/** Array of file descriptors to OpenFile Objects */
 	protected OpenFile[] files;
-
-
-
-
-	/** Array of file descriptors to OpenFile Objects */
-	protected OpenFile[] files;
-
 
 	/** The program being run by this process. */
 	protected Coff coff;
