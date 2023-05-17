@@ -22,6 +22,8 @@ public class UserKernel extends ThreadedKernel {
 	 * processor's exception handler.
 	 */
 	public void initialize(String[] args) {
+		initLock.acquire();
+		initializeMemory();
 		super.initialize(args);
 
 		console = new SynchConsole(Machine.console());
@@ -31,10 +33,10 @@ public class UserKernel extends ThreadedKernel {
 				exceptionHandler();
 			}
 		});
+		initLock.release();
 	}
 
-	public static void initializeMemory(){
-		initLock.acquire();
+	private static void initializeMemory(){
 		if (intialized != 0){
 			intialized = 1;
 
@@ -47,7 +49,6 @@ public class UserKernel extends ThreadedKernel {
 			}
 
 		}
-		initLock.release();
 	}
 
 	/**
@@ -140,9 +141,6 @@ public class UserKernel extends ThreadedKernel {
 
 	public static int getPPN(){
 		initLock.acquire();
-		if(physicalMemoryAvail == null){
-			initializeMemory();
-		}
 		if(physicalMemoryAvail.size() > 0){
 			initLock.release();
 			return physicalMemoryAvail.pop();
