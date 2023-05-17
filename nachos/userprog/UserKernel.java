@@ -14,7 +14,12 @@ public class UserKernel extends ThreadedKernel {
 	 * Allocate a new user kernel.
 	 */
 	public UserKernel() {
+		
 		super();
+		
+		initLock.acquire();
+		initializeMemory();
+		initLock.release();
 	}
 
 	/**
@@ -22,8 +27,8 @@ public class UserKernel extends ThreadedKernel {
 	 * processor's exception handler.
 	 */
 	public void initialize(String[] args) {
-		initLock.acquire();
-		initializeMemory();
+		
+		
 		super.initialize(args);
 
 		console = new SynchConsole(Machine.console());
@@ -33,7 +38,7 @@ public class UserKernel extends ThreadedKernel {
 				exceptionHandler();
 			}
 		});
-		initLock.release();
+		
 	}
 
 	private static void initializeMemory(){
