@@ -684,7 +684,7 @@ public class UserProcess {
 
 	private int findOpenTableIndex(){
 
-		for (int i = 0; i < files.length; i++) {
+		for (int i = 2; i < files.length; i++) {
 			if(files[i] == null){
 				return i;
 			}
