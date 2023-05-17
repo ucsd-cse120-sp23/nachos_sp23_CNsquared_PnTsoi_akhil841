@@ -933,5 +933,5 @@ public class UserProcess {
 
 	public static int freeProcessID = 1;
 
-	private Lock rwLock;
+	private Lock rwLock = new Lock();
 }

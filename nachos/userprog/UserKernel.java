@@ -179,5 +179,5 @@ public class UserKernel extends ThreadedKernel {
 	// dummy variables to make javac smarter
 	private static Coff dummy1 = null;
 	private static int intialized = 0;
-	private static Lock initLock;
+	private static Lock initLock = new Lock();
 }
