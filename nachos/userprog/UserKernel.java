@@ -17,9 +17,9 @@ public class UserKernel extends ThreadedKernel {
 		
 		super();
 		
-		Machine.interrupt().disable();
+		//Machine.interrupt().disable();
 		initializeMemory();
-		Machine.interrupt().enable();
+		//Machine.interrupt().enable();
 	}
 
 	/**
