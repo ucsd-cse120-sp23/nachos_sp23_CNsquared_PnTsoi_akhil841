@@ -133,35 +133,35 @@ public class UserKernel extends ThreadedKernel {
 	}
 
 	public static int getPPN(){
-		lock.acquire();
+		
 
 		if(physicalMemoryAvail.size() > 0){
-			lock.release();
+
 			return physicalMemoryAvail.pop();
 		}
-		lock.release();
+
 		return -1;
 
 		
 	}
 
 	public static int freePPN(int page){
-		lock.acquire();
+	
 
 		if(physicalMemoryAvail.contains(page)){
-			lock.release();
+	
 			return -1;
 		}
 
 		physicalMemoryAvail.add(page);
-		lock.release();
+
 		return 0;
 
 	}
 
 	/** Globally accessible reference to the synchronized console. */
 	public static SynchConsole console;
-	public static Lock lock = new Lock();
+
 
 	private static LinkedList<Integer> physicalMemoryAvail;
 
