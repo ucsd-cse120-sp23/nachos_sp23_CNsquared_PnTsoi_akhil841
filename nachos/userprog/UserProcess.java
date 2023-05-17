@@ -361,10 +361,13 @@ public class UserProcess {
 	 * Handle the halt() system call.
 	 */
 	private int handleHalt() {
-
+		if(parent != null) {
+			Lib.assertNotReached("Machine.halt() non root process attempted to call halt!");
+			return -1;
+		}
 		Machine.halt();
-
 		Lib.assertNotReached("Machine.halt() did not halt machine!");
+
 		return 0;
 	}
 
@@ -413,13 +416,13 @@ public class UserProcess {
 	}
 
 	private int handleExec(String programName, int argc, int ptrArray) {
-		Machine.interrupt().enable();
+		Machine.interrupt().disable();
 		if(programName == null) {
-			Machine.interrupt().disable();
+			Machine.interrupt().enable();
 			return -1;
 		}
 		if(argc < 0) {
-			Machine.interrupt().disable();
+			Machine.interrupt().enable();
 			return -1;
 		}
 		// get arguments in ptrArray
@@ -429,12 +432,12 @@ public class UserProcess {
 		for(int i = 0; i < argc; i++) {
 			int cec = readVirtualMemory(ptrArray+offset, argBytes, 0, 4);
 			if(cec != 4) {
-				Machine.interrupt().disable();
+				Machine.interrupt().enable();
 				return -1;
 			}
 			int addr_i = Lib.bytesToInt(argBytes, offset);
 			if(addr_i < 0) {
-				Machine.interrupt().disable();
+				Machine.interrupt().enable();
 				return -1;
 			}
 			argArray[i] = addr_i;
@@ -446,7 +449,7 @@ public class UserProcess {
 		for(int i = 0; i < argc; i++) {
 			args[i] = readVirtualMemoryString(argArray[i], 256);
 			if(args[i] == null) {
-				Machine.interrupt().disable();
+				Machine.interrupt().enable();
 				return -1;
 			}
 		}
@@ -454,9 +457,10 @@ public class UserProcess {
 		// create new process
 		UserProcess child = UserProcess.newUserProcess();
 		children.add(child);	
+		child.parent = this;
 		child.load(programName, args);
 
-		Machine.interrupt().disable();
+		Machine.interrupt().enable();
 		return child.processID;
 	}
 
@@ -468,14 +472,15 @@ public class UserProcess {
 		if(files[fileDescriptor] == null) return -1;
 		//read from file
 		//initialize buffer
-		byte[] buffer = new byte[256];
+		int pageSize = Processor.pageSize;
+		byte[] buffer = new byte[pageSize];
 		int offset = 0;
 		int bytesRead = 0;
 		int totalBytesRead = 0;
 		OpenFile file = files[fileDescriptor];
 
 		while (count > 0) {
-			int bytesToRead = Math.min(count, 256);
+			int bytesToRead = Math.min(count, pageSize);
 			bytesRead = file.read(buffer, offset, bytesToRead);
 			if (bytesRead == -1 || bytesRead == 0) return totalBytesRead;
 			int bytesWritten = writeVirtualMemory(vaddr, buffer, offset, bytesRead);
@@ -498,14 +503,15 @@ public class UserProcess {
 		if(files[fileDescriptor] == null) return -1;
 		//read from file
 		//initialize buffer
-		byte[] buffer = new byte[256];
+		int pageSize = Processor.pageSize;
+		byte[] buffer = new byte[pageSize];
 		int offset = 0;
 		int bytesRead = 0;
 		int totalBytesWrite = 0;
 		OpenFile file = files[fileDescriptor];
 
 		while (count > 0) {
-			int bytesToRead = Math.min(count, 256);
+			int bytesToRead = Math.min(count, pageSize);
 			bytesRead = readVirtualMemory(vaddr, buffer, offset, bytesToRead);
 			if (bytesRead == -1 || bytesRead == 0) return -1;
 			int bytesWritten = file.write(buffer, offset, bytesRead);
@@ -562,7 +568,7 @@ public class UserProcess {
 	}
 	
 	private int fileIndexNameLinearSearch(String name){
-		for (int i = 0; i < 16; i++)
+		for (int i = 2; i < 16; i++)
 			if (files[i].getName().equals(name))
 				return i;
 		return -1;
@@ -637,7 +643,7 @@ public class UserProcess {
 		boolean found = false;
 		for (UserProcess i : children)
 		{
-			if (i.pid == processID)
+			if (i.processID == processID)
 			{
 				child = i;
 				found = true;
@@ -828,7 +834,7 @@ public class UserProcess {
 	
 	private boolean finished = false;
 
-	private int pid;
+	public int processID;
 
 	public static int freeProcessID = 1;
 
