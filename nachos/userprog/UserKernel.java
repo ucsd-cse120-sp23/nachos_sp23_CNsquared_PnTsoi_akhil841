@@ -1,5 +1,7 @@
 package nachos.userprog;
 
+import java.util.LinkedList;
+
 import nachos.machine.*;
 import nachos.threads.*;
 import nachos.userprog.*;
@@ -29,6 +31,21 @@ public class UserKernel extends ThreadedKernel {
 				exceptionHandler();
 			}
 		});
+	}
+
+	public static void initializeMemory(){
+		if (intialized != 0){
+			intialized = 1;
+
+			physicalMemoryAvail = new LinkedList<Integer>();
+			
+			byte[] memory = Machine.processor().getMemory();
+
+			for(int i = 0; i < memory.length; i+= Processor.pageSize ){
+				physicalMemoryAvail.add(i);
+			}
+
+		}
 	}
 
 	/**
@@ -119,9 +136,42 @@ public class UserKernel extends ThreadedKernel {
 		super.terminate();
 	}
 
+	public static int getPPN(){
+		
+		if(physicalMemoryAvail == null){
+			initializeMemory();
+		}
+		if(physicalMemoryAvail.size() > 0){
+
+			return physicalMemoryAvail.pop();
+		}
+
+		return -1;
+
+		
+	}
+
+	public static int freePPN(int page){
+	
+
+		if(physicalMemoryAvail.contains(page)){
+	
+			return -1;
+		}
+
+		physicalMemoryAvail.add(page);
+
+		return 0;
+
+	}
+
 	/** Globally accessible reference to the synchronized console. */
 	public static SynchConsole console;
 
+
+	private static LinkedList<Integer> physicalMemoryAvail;
+
 	// dummy variables to make javac smarter
 	private static Coff dummy1 = null;
+	private static int intialized = 0;
 }

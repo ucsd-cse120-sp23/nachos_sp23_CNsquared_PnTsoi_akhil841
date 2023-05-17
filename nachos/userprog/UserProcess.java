@@ -157,15 +157,53 @@ public class UserProcess {
 
 		byte[] memory = Machine.processor().getMemory();
 
-		// for now, just assume that virtual addresses equal physical addresses
-		if (vaddr < 0 || vaddr >= memory.length)
-			return 0;
+		int paddr;
+		int amountCopied = 0;
 
-		int amount = Math.min(length, memory.length - vaddr);
-		System.arraycopy(memory, vaddr, data, offset, amount);
+		//loop for reading memory page by page
 
-		return amount;
+		while(amountCopied < length){
+
+			//get the physical address from virtual adresss
+			
+			paddr = getPaddr(vaddr);
+			if (paddr < 0 || paddr >= memory.length)
+				return amountCopied;
+
+	
+			//the amount that we read from this page is either the entire page( starting at the paddr) or the remainder of what we are supposed to copy
+			int amount = Math.min(length - amountCopied, pageSize - Processor.offsetFromAddress(paddr));
+			//writes it to the data 
+			System.arraycopy(memory, paddr, data, offset + amountCopied, amount);
+			amountCopied += amount;
+			//offsets the virtual address
+			vaddr += amount;
+			
+		}
+
+
+		return amountCopied;
 	}
+
+	private int getPaddr(int vaddr){;
+
+		int paddr = -1;
+
+		int vpn = Processor.pageFromAddress(vaddr);
+		int addrOffest = Processor.offsetFromAddress(vaddr);
+
+		if(vpn >= pageTable.length || vpn < 0){
+			return -1;
+		}
+		if(!pageTable[vpn].valid) return -1;
+		//pageTable[vpn].used = true;
+		int ppn = pageTable[vpn].ppn;
+		paddr = pageSize * ppn + addrOffest;
+
+		return paddr;
+		
+	}
+
 
 	/**
 	 * Transfer all data from the specified array to this process's virtual
@@ -199,14 +237,41 @@ public class UserProcess {
 
 		byte[] memory = Machine.processor().getMemory();
 
-		// for now, just assume that virtual addresses equal physical addresses
-		if (vaddr < 0 || vaddr >= memory.length)
-			return 0;
+		int amountWritten = 0;
+		int paddr;
 
-		int amount = Math.min(length, memory.length - vaddr);
-		System.arraycopy(data, offset, memory, vaddr, amount);
+		//loop for reading memory page by page
 
-		return amount;
+		while(amountWritten < length){
+
+			//get the physical address from virtual adresss
+			paddr = getPaddr(vaddr);
+			if (paddr < 0 || paddr >= memory.length || !validWrite(vaddr))
+				return amountWritten;
+
+	
+			//the amount that we write to this page is either the entire page( starting at the paddr) or the remainder of what we are supposed to write
+			int amount = Math.min(length - amountWritten, pageSize - Processor.offsetFromAddress(paddr));
+			//writes it to the data 
+			System.arraycopy(data, offset + amountWritten, memory, paddr, amount);
+			amountWritten += amount;
+			//offsets the virtual address
+			vaddr += amount;
+			
+		}
+
+		return amountWritten;
+	}
+
+
+	private boolean validWrite(int vaddr){
+
+		int vpn = Processor.pageFromAddress(vaddr);
+
+		if(vpn >= pageTable.length || vpn < 0){
+			return false;
+		}
+		return !pageTable[vpn].readOnly;
 	}
 
 	/**
@@ -304,6 +369,7 @@ public class UserProcess {
 	 * @return <tt>true</tt> if the sections were successfully loaded.
 	 */
 	protected boolean loadSections() {
+		
 		if (numPages > Machine.processor().getNumPhysPages()) {
 			coff.close();
 			Lib.debug(dbgProcess, "\tinsufficient physical memory");
@@ -320,8 +386,16 @@ public class UserProcess {
 			for (int i = 0; i < section.getLength(); i++) {
 				int vpn = section.getFirstVPN() + i;
 
-				// for now, just assume virtual addresses=physical addresses
-				section.loadPage(i, vpn);
+				//get availble physical page
+				int ppn = UserKernel.getPPN();
+				//if not return -1 
+				if(ppn == -1){
+					return false;
+				}
+
+				//create translation entry from vpn to ppn 
+				pageTable[i] = new TranslationEntry(vpn, ppn, section.isReadOnly(), false, false, false);
+				section.loadPage(i, ppn);
 			}
 		}
 
@@ -332,6 +406,15 @@ public class UserProcess {
 	 * Release any resources allocated by <tt>loadSections()</tt>.
 	 */
 	protected void unloadSections() {
+
+		//go through pagetable and free all of the physical pages
+		for(int i = 0; i < pageTable.length; i++){
+			TranslationEntry entry = pageTable[i];
+			UserKernel.freePPN(entry.ppn);
+
+			pageTable[i] = null;
+		}
+
 	}
 
 	/**
@@ -679,6 +762,7 @@ public class UserProcess {
 			syscallJoin = 3, syscallCreate = 4, syscallOpen = 5,
 			syscallRead = 6, syscallWrite = 7, syscallClose = 8,
 			syscallUnlink = 9;
+	
 
 	/**
 	 * Handle a syscall exception. Called by <tt>handleException()</tt>. The
@@ -798,6 +882,12 @@ public class UserProcess {
 			Lib.assertNotReached("Unexpected exception");
 		}
 	}
+	/** Array of file descriptors to OpenFile Objects */
+	protected OpenFile[] files;
+
+
+
+
 	/** Array of file descriptors to OpenFile Objects */
 	protected OpenFile[] files;
 
