@@ -24,6 +24,16 @@ public class UserKernel extends ThreadedKernel {
 	public void initialize(String[] args) {
 		super.initialize(args);
 
+		console = new SynchConsole(Machine.console());
+
+		Machine.processor().setExceptionHandler(new Runnable() {
+			public void run() {
+				exceptionHandler();
+			}
+		});
+	}
+
+	public static void initializeMemory(){
 		if (intialized != 0){
 			intialized = 1;
 			
@@ -34,14 +44,6 @@ public class UserKernel extends ThreadedKernel {
 			}
 
 		}
-
-		console = new SynchConsole(Machine.console());
-
-		Machine.processor().setExceptionHandler(new Runnable() {
-			public void run() {
-				exceptionHandler();
-			}
-		});
 	}
 
 	/**
@@ -134,7 +136,9 @@ public class UserKernel extends ThreadedKernel {
 
 	public static int getPPN(){
 		
-
+		if(physicalMemoryAvail == null){
+			initializeMemory();
+		}
 		if(physicalMemoryAvail.size() > 0){
 
 			return physicalMemoryAvail.pop();
