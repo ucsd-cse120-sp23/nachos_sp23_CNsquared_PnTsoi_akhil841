@@ -17,9 +17,9 @@ public class UserKernel extends ThreadedKernel {
 		
 		super();
 		
-		initLock.acquire();
+		Machine.interrupt().disable();
 		initializeMemory();
-		initLock.release();
+		Machine.interrupt().enable();
 	}
 
 	/**
@@ -145,12 +145,12 @@ public class UserKernel extends ThreadedKernel {
 	}
 
 	public static int getPPN(){
-		initLock.acquire();
+		Machine.interrupt().disable();
 		if(physicalMemoryAvail.size() > 0){
-			initLock.release();
+			Machine.interrupt().enable();
 			return physicalMemoryAvail.pop();
 		}
-		initLock.release();
+		Machine.interrupt().enable();
 		return -1;
 
 		
@@ -158,14 +158,14 @@ public class UserKernel extends ThreadedKernel {
 
 	public static int freePPN(int page){
 	
-		initLock.acquire();
+		Machine.interrupt().disable();
 		if(physicalMemoryAvail.contains(page)){
-			initLock.release();
+			Machine.interrupt().enable();
 			return -1;
 		}
 
 		physicalMemoryAvail.add(page);
-		initLock.release();
+		Machine.interrupt().enable();
 		return 0;
 
 	}
@@ -179,5 +179,5 @@ public class UserKernel extends ThreadedKernel {
 	// dummy variables to make javac smarter
 	private static Coff dummy1 = null;
 	private static int intialized = 0;
-	private final static Lock initLock = new Lock();
+	//private final static Lock initLock = new Lock();
 }

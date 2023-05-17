@@ -153,7 +153,7 @@ public class UserProcess {
 	 * @return the number of bytes successfully transferred.
 	 */
 	public int readVirtualMemory(int vaddr, byte[] data, int offset, int length) {
-		rwLock.acquire();
+		Machine.interrupt().disable();
 		Lib.assertTrue(offset >= 0 && length >= 0
 				&& offset + length <= data.length);
 
@@ -171,7 +171,7 @@ public class UserProcess {
 			paddr = getPaddr(vaddr);
 			if (paddr < 0 || paddr >= memory.length)
 			{
-				rwLock.release();
+				Machine.interrupt().enable();
 				return -1;
 			}
 
@@ -186,7 +186,7 @@ public class UserProcess {
 			
 		}
 
-		rwLock.release();
+		Machine.interrupt().enable();
 		return amountCopied;
 	}
 
@@ -237,7 +237,7 @@ public class UserProcess {
 	 * @return the number of bytes successfully transferred.
 	 */
 	public int writeVirtualMemory(int vaddr, byte[] data, int offset, int length) {
-		rwLock.acquire();
+		Machine.interrupt().disable();
 		Lib.assertTrue(offset >= 0 && length >= 0
 				&& offset + length <= data.length);
 
@@ -254,7 +254,7 @@ public class UserProcess {
 			paddr = getPaddr(vaddr);
 			if (paddr < 0 || paddr >= memory.length || !validWrite(vaddr))
 			{
-				rwLock.release();
+				Machine.interrupt().enable();
 				return -1;
 			}
 
@@ -268,7 +268,7 @@ public class UserProcess {
 			vaddr += amount;
 			
 		}
-		rwLock.release();
+		Machine.interrupt().enable();
 		return amountWritten;
 	}
 
@@ -933,5 +933,5 @@ public class UserProcess {
 
 	public static int freeProcessID = 1;
 
-	private final Lock rwLock = new Lock();
+	//private final Lock rwLock = new Lock();
 }
