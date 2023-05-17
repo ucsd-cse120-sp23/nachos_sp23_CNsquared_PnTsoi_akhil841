@@ -42,10 +42,8 @@ public class UserKernel extends ThreadedKernel {
 			intialized = 1;
 
 			physicalMemoryAvail = new LinkedList<Integer>();
-			
-			byte[] memory = Machine.processor().getMemory();
 
-			for(int i = 0; i < memory.length; i+= Processor.pageSize ){
+			for(int i = 0; i < Machine.processor().getNumPhysPages(); i++ ){
 				physicalMemoryAvail.add(i);
 			}
 
