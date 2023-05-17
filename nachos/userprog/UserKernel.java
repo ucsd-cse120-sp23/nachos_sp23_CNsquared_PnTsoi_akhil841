@@ -38,7 +38,7 @@ public class UserKernel extends ThreadedKernel {
 
 	private static void initializeMemory(){
 		Machine.interrupt().disable();
-		if (intialized != 0){
+		if (intialized == 0){
 			intialized = 1;
 
 			physicalMemoryAvail = new LinkedList<Integer>();
