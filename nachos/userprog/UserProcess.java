@@ -6,6 +6,7 @@ import nachos.userprog.*;
 import nachos.vm.*;
 
 import java.io.EOFException;
+import java.util.ArrayList;
 
 /**
  * Encapsulates the state of a user process that is not contained in its user
@@ -27,6 +28,8 @@ public class UserProcess {
 		int numPhysPages = Machine.processor().getNumPhysPages();
 		pageTable = new TranslationEntry[numPhysPages];
 		files = new OpenFile[16];
+		processID = freeProcessID;
+		freeProcessID++;
 		files[0] = UserKernel.console.openForReading();
 		files[1] = UserKernel.console.openForWriting();
 		for (int i = 0; i < numPhysPages; i++)
@@ -378,10 +381,51 @@ public class UserProcess {
 	}
 
 	private int handleExec(String programName, int argc, int ptrArray) {
-		if(programName == null) return -1;
-		if(argc < 0) return -1;
+		Machine.interrupt().enable();
+		if(programName == null) {
+			Machine.interrupt().disable();
+			return -1;
+		}
+		if(argc < 0) {
+			Machine.interrupt().disable();
+			return -1;
+		}
+		// get arguments in ptrArray
+		int offset = 0;
+		byte[] argBytes = new byte[4];
+		int[] argArray = new int[argc];
+		for(int i = 0; i < argc; i++) {
+			int cec = readVirtualMemory(ptrArray+offset, argBytes, 0, 4);
+			if(cec != 4) {
+				Machine.interrupt().disable();
+				return -1;
+			}
+			int addr_i = Lib.bytesToInt(argBytes, offset);
+			if(addr_i < 0) {
+				Machine.interrupt().disable();
+				return -1;
+			}
+			argArray[i] = addr_i;
+			offset+=4;
+		}
 
-		return 0;
+		// get argument string
+		String[] args = new String[argc];
+		for(int i = 0; i < argc; i++) {
+			args[i] = readVirtualMemoryString(argArray[i], 256);
+			if(args[i] == null) {
+				Machine.interrupt().disable();
+				return -1;
+			}
+		}
+
+		// create new process
+		UserProcess child = UserProcess.newUserProcess();
+		children.add(child);	
+		child.load(programName, args);
+
+		Machine.interrupt().disable();
+		return child.processID;
 	}
 
 	private int handleRead(int fileDescriptor, int vaddr, int count) {
@@ -698,4 +742,7 @@ public class UserProcess {
 	private static final int pageSize = Processor.pageSize;
 
 	private static final char dbgProcess = 'a';
+	public ArrayList<UserProcess> children = new ArrayList<UserProcess>();
+	public static int freeProcessID = 1;
+	public int processID = 0;
 }
