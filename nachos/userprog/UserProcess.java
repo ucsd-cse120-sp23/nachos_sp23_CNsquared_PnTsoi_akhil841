@@ -1,11 +1,12 @@
 package nachos.userprog;
 
+import java.io.EOFException;
+import java.util.ArrayList;
 import nachos.machine.*;
 import nachos.threads.*;
 import nachos.userprog.*;
 import nachos.vm.*;
 
-import java.io.EOFException;
 
 /**
  * Encapsulates the state of a user process that is not contained in its user
@@ -27,6 +28,8 @@ public class UserProcess {
 		int numPhysPages = Machine.processor().getNumPhysPages();
 		pageTable = new TranslationEntry[numPhysPages];
 		files = new OpenFile[16];
+		files[0] = UserKernel.console.openForReading();
+		files[1] = UserKernel.console.openForWriting();
 		for (int i = 0; i < numPhysPages; i++)
 			pageTable[i] = new TranslationEntry(i, i, true, false, false, false);
 	}
@@ -369,10 +372,38 @@ public class UserProcess {
 		// can grade your implementation.
 
 		Lib.debug(dbgProcess, "UserProcess.handleExit (" + status + ")");
-		// for now, unconditionally terminate with just one process
-		Kernel.kernel.terminate();
-
-		return 0;
+		// close all open files
+		for (OpenFile i : files) {
+			if (i != null)
+				i.close();
+		}
+		// free all pages
+		unloadSections();
+		// give every child a null parent
+		for (UserProcess i : children)
+		{
+			i.parent = null;
+		}
+		// write the exit code at the address, if it's not null
+		if (exitCodeAddr != 0)
+		{
+			//the system is little endian
+			byte[] exitStatus = new byte[4];
+			Lib.bytesFromInt(exitStatus, 0, status);
+			writeVirtualMemory(exitCodeAddr, exitStatus);
+		}
+		// if this process has a parent, tell it that this process
+		// is finished
+		if (parent != null)
+		{
+			finished = true;
+			return 0;
+		}
+		else {
+			//otherwise, terminate (we are at the root)
+			Kernel.kernel.terminate();
+			return status;
+		}
 	}
 
 	private int handleRead(int fileDescriptor, int vaddr, int count) {
@@ -439,6 +470,7 @@ public class UserProcess {
 			return -1;
 		//get file name (must be 256 bytes or less)
 		String fname = readVirtualMemoryString(naddr, 256);
+		
 		int fileIdx = fileIndexLinearSearch();
 		if (fileIdx != -1)
 		{
@@ -542,6 +574,47 @@ public class UserProcess {
 		return -1;
 	}
 
+	private int handleJoin(int processID, int ecAddr) {
+		//check for nullptr
+		if (ecAddr == 0)
+			return -1;
+		//get child process, if it exists
+		UserProcess child = null;
+		boolean found = false;
+		for (UserProcess i : children)
+		{
+			if (i.pid == processID)
+			{
+				child = i;
+				found = true;
+			}
+		}
+		if (!found) return -1;
+		//if child is finished, return immediately.
+		if (child.finished)
+		{
+			byte[] statusInfoBytes = new byte[4];
+			//read status code
+			readVirtualMemory(ecAddr, statusInfoBytes);
+			//get status code
+			int code = Lib.bytesToInt(statusInfoBytes, 0);
+			//return 1 if normal execution, 0 if exception.
+			return (code != 0) ? 0 : 1;
+		}
+		//otherwise, pass ecAddr to child process
+		child.exitCodeAddr = ecAddr;
+		//wait for child to finish
+		while (!child.finished);
+		//get code and return
+		byte[] statusInfoBytes = new byte[4];
+		//read status code
+		readVirtualMemory(ecAddr, statusInfoBytes);
+		//get status code
+		int code = Lib.bytesToInt(statusInfoBytes, 0);
+		//return 1 if normal execution, 0 if exception.
+		return (code != 0) ? 0 : 1;
+	}
+
 	private static final int syscallHalt = 0, syscallExit = 1, syscallExec = 2,
 			syscallJoin = 3, syscallCreate = 4, syscallOpen = 5,
 			syscallRead = 6, syscallWrite = 7, syscallClose = 8,
@@ -626,6 +699,8 @@ public class UserProcess {
 			return handleHalt();
 		case syscallExit:
 			return handleExit(a0);
+		case syscallJoin:
+			return handleJoin(a0, a1);
 
 		default:
 			Lib.debug(dbgProcess, "Unknown syscall " + syscall);
@@ -687,4 +762,14 @@ public class UserProcess {
 	private static final int pageSize = Processor.pageSize;
 
 	private static final char dbgProcess = 'a';
+
+	private UserProcess parent = null;
+
+	private ArrayList<UserProcess> children = new ArrayList<>();
+
+	private int exitCodeAddr = 0;
+	
+	private boolean finished = false;
+
+	private int pid;
 }
