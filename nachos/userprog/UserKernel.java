@@ -36,6 +36,8 @@ public class UserKernel extends ThreadedKernel {
 	public static void initializeMemory(){
 		if (intialized != 0){
 			intialized = 1;
+
+			physicalMemoryAvail = new LinkedList<Integer>();
 			
 			byte[] memory = Machine.processor().getMemory();
 
