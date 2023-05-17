@@ -14,12 +14,7 @@ public class UserKernel extends ThreadedKernel {
 	 * Allocate a new user kernel.
 	 */
 	public UserKernel() {
-		
 		super();
-		
-		//Machine.interrupt().disable();
-		initializeMemory();
-		//Machine.interrupt().enable();
 	}
 
 	/**
@@ -42,6 +37,7 @@ public class UserKernel extends ThreadedKernel {
 	}
 
 	private static void initializeMemory(){
+		Machine.interrupt().disable();
 		if (intialized != 0){
 			intialized = 1;
 
@@ -54,6 +50,7 @@ public class UserKernel extends ThreadedKernel {
 			}
 
 		}
+		Machine.interrupt().enable();
 	}
 
 	/**
@@ -146,6 +143,12 @@ public class UserKernel extends ThreadedKernel {
 
 	public static int getPPN(){
 		Machine.interrupt().disable();
+
+		if(physicalMemoryAvail == null){
+			initializeMemory();
+		}
+
+
 		if(physicalMemoryAvail.size() > 0){
 			Machine.interrupt().enable();
 			return physicalMemoryAvail.pop();
