@@ -111,6 +111,7 @@ public class UserProcess {
 	 * found.
 	 */
 	public String readVirtualMemoryString(int vaddr, int maxLength) {
+
 		Lib.assertTrue(maxLength >= 0);
 
 		byte[] bytes = new byte[maxLength + 1];
@@ -152,6 +153,7 @@ public class UserProcess {
 	 * @return the number of bytes successfully transferred.
 	 */
 	public int readVirtualMemory(int vaddr, byte[] data, int offset, int length) {
+		rwLock.acquire();
 		Lib.assertTrue(offset >= 0 && length >= 0
 				&& offset + length <= data.length);
 
@@ -168,7 +170,10 @@ public class UserProcess {
 			
 			paddr = getPaddr(vaddr);
 			if (paddr < 0 || paddr >= memory.length)
+			{
+				rwLock.release();
 				return amountCopied;
+			}
 
 	
 			//the amount that we read from this page is either the entire page( starting at the paddr) or the remainder of what we are supposed to copy
@@ -181,7 +186,7 @@ public class UserProcess {
 			
 		}
 
-
+		rwLock.release();
 		return amountCopied;
 	}
 
@@ -232,6 +237,7 @@ public class UserProcess {
 	 * @return the number of bytes successfully transferred.
 	 */
 	public int writeVirtualMemory(int vaddr, byte[] data, int offset, int length) {
+		rwLock.acquire();
 		Lib.assertTrue(offset >= 0 && length >= 0
 				&& offset + length <= data.length);
 
@@ -247,7 +253,10 @@ public class UserProcess {
 			//get the physical address from virtual adresss
 			paddr = getPaddr(vaddr);
 			if (paddr < 0 || paddr >= memory.length || !validWrite(vaddr))
+			{
+				rwLock.release();
 				return amountWritten;
+			}
 
 	
 			//the amount that we write to this page is either the entire page( starting at the paddr) or the remainder of what we are supposed to write
@@ -259,7 +268,7 @@ public class UserProcess {
 			vaddr += amount;
 			
 		}
-
+		rwLock.release();
 		return amountWritten;
 	}
 
@@ -684,7 +693,7 @@ public class UserProcess {
 
 	private int findOpenTableIndex(){
 
-		for (int i = 0; i < files.length; i++) {
+		for (int i = 2; i < files.length; i++) {
 			if(files[i] == null){
 				return i;
 			}
@@ -924,5 +933,5 @@ public class UserProcess {
 
 	public static int freeProcessID = 1;
 
-
+	private Lock rwLock;
 }
