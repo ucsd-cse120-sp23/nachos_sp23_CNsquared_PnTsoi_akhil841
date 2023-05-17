@@ -185,7 +185,6 @@ public class Condition2 {
 
     private static void sleepForTest1 () {
 
-<<<<<<< Updated upstream
             final Lock lock = new Lock();
             // final Condition empty = new Condition(lock);
             final Condition2 cv = new Condition2(lock);
@@ -227,47 +226,6 @@ public class Condition2 {
         }
 
 
-=======
-        final Lock lock = new Lock();
-        // final Condition empty = new Condition(lock);
-        final Condition2 cv = new Condition2(lock);
-        final LinkedList<Integer> list = new LinkedList<>();
-
-        KThread consumer = new KThread( new Runnable () {
-                public void run() {
-                    lock.acquire();
-                    long t0 = Machine.timer().getTime();
-                    System.out.println (KThread.currentThread().getName() + " sleeping");
-                    cv.sleepFor(200000);
-                    long t1 = Machine.timer().getTime();
-                    System.out.println(KThread.currentThread().getName() +
-                           " woke up, slept for " + (t1 - t0) + " ticks");
-                    
-                    lock.release();
-                }
-            });
-
-        KThread producer = new KThread( new Runnable () {
-                public void run() {
-                    lock.acquire();
-                    cv.wake();
-                    
-                    lock.release();
-                }
-            });
-
-        consumer.setName("Consumer");
-        producer.setName("Producer");
-        consumer.fork();
-        producer.fork();
-
-        consumer.join();
-        System.out.println("Consumer joined");
-        producer.join();
-        System.out.println("Producer joined");
-        
-    }
->>>>>>> Stashed changes
 
     public static void selfTest() {
         sleepForTest1();
