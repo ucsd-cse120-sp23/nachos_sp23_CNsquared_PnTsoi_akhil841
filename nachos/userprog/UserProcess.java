@@ -172,7 +172,7 @@ public class UserProcess {
 			if (paddr < 0 || paddr >= memory.length)
 			{
 				rwLock.release();
-				return -1;
+				return amountCopied;
 			}
 
 	
@@ -255,7 +255,7 @@ public class UserProcess {
 			if (paddr < 0 || paddr >= memory.length || !validWrite(vaddr))
 			{
 				rwLock.release();
-				return -1;
+				return amountWritten;
 			}
 
 	
