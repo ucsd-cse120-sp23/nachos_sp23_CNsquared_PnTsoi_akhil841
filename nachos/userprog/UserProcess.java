@@ -574,7 +574,7 @@ public class UserProcess {
 		while (count > 0) {
 			int bytesToRead = Math.min(count, pageSize);
 			bytesRead = file.read(buffer, 0, bytesToRead);
-			if (bytesRead == -1 || bytesRead == 0) return totalBytesRead;
+			if (bytesRead <= 0) return totalBytesRead;
 			int bytesWritten = writeVirtualMemory(vaddr, buffer, 0, bytesRead);
 			if(bytesWritten == -1) return -1;
 			if(bytesWritten != bytesRead) return totalBytesRead;
@@ -605,7 +605,7 @@ public class UserProcess {
 		while (count > 0) {
 			int bytesToRead = Math.min(count, pageSize);
 			bytesRead = readVirtualMemory(vaddr, buffer, 0, bytesToRead);
-			if (bytesRead == -1 || bytesRead == 0) return -1;
+			if (bytesRead <= 0) return -1;
 			int bytesWritten = file.write(buffer, 0, bytesRead);
 			if(bytesWritten != bytesRead) return -1;
 			count -= bytesRead;
