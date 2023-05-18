@@ -293,6 +293,7 @@ public class UserProcess {
 	 * @return <tt>true</tt> if the executable was successfully loaded.
 	 */
 	private boolean load(String name, String[] args) {
+		System.out.println("Attempting load");
 		Lib.debug(dbgProcess, "UserProcess.load(\"" + name + "\")");
 
 		OpenFile executable = ThreadedKernel.fileSystem.open(name, false);
@@ -366,6 +367,8 @@ public class UserProcess {
 			stringOffset += 1;
 		}
 
+		System.out.println("loaded");
+
 		return true;
 	}
 
@@ -377,6 +380,7 @@ public class UserProcess {
 	 * @return <tt>true</tt> if the sections were successfully loaded.
 	 */
 	protected boolean loadSections() {
+		System.out.println("attempting loading sections");
 		
 		if (numPages > Machine.processor().getNumPhysPages()) {
 			coff.close();
@@ -406,6 +410,8 @@ public class UserProcess {
 				section.loadPage(i, ppn);
 			}
 		}
+
+		System.out.println("loaded sections");
 
 		return true;
 	}
