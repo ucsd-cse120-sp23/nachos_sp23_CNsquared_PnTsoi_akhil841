@@ -202,7 +202,8 @@ public class UserProcess {
 		if(!pageTable[vpn].valid) return -1;
 		//pageTable[vpn].used = true;
 		int ppn = pageTable[vpn].ppn;
-		paddr = Processor.makeAddress(addrOffest, ppn);
+		paddr = Processor.makeAddress(ppn, addrOffest);
+		//paddr = pageSize * ppn + addrOffest;
 
 		return paddr;
 		
