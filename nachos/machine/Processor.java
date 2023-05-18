@@ -98,6 +98,7 @@ public final class Processor {
 				inst.run();
 			}
 			catch (MipsException e) {
+				System.out.println("MipsException Code: " + e);
 				e.handle();
 			}
 
