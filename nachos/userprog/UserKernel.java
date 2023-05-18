@@ -100,6 +100,7 @@ public class UserKernel extends ThreadedKernel {
 
 		UserProcess process = ((UThread) KThread.currentThread()).process;
 		int cause = Machine.processor().readRegister(Processor.regCause);
+		System.out.println(cause);
 		process.handleException(cause);
 	}
 
