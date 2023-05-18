@@ -36,8 +36,7 @@ public class UserProcess {
 
 		files[0] = UserKernel.console.openForReading();
 		files[1] = UserKernel.console.openForWriting();
-		for (int i = 0; i < numPhysPages; i++)
-			pageTable[i] = new TranslationEntry(i, i, true, false, false, false);
+		
 	}
 
 	/**
@@ -574,7 +573,7 @@ public class UserProcess {
 		while (count > 0) {
 			int bytesToRead = Math.min(count, pageSize);
 			bytesRead = file.read(buffer, 0, bytesToRead);
-			if (bytesRead == -1 || bytesRead == 0) return totalBytesRead;
+			if (bytesRead <= 0) return totalBytesRead;
 			int bytesWritten = writeVirtualMemory(vaddr, buffer, 0, bytesRead);
 			if(bytesWritten == -1) return -1;
 			if(bytesWritten != bytesRead) return totalBytesRead;
@@ -589,6 +588,7 @@ public class UserProcess {
 	
 	private int handleWrite(int fileDescriptor, int vaddr, int count) {
 		//check for invalid file descriptor
+		System.out.println("HEREREHREHRERE");
 		if (fileDescriptor < 0 || fileDescriptor >= 16) return -1;
 		//check for invalid count
 		if (count < 0) return -1;
@@ -605,7 +605,7 @@ public class UserProcess {
 		while (count > 0) {
 			int bytesToRead = Math.min(count, pageSize);
 			bytesRead = readVirtualMemory(vaddr, buffer, 0, bytesToRead);
-			if (bytesRead == -1 || bytesRead == 0) return -1;
+			if (bytesRead <= 0) return -1;
 			int bytesWritten = file.write(buffer, 0, bytesRead);
 			if(bytesWritten != bytesRead) return -1;
 			count -= bytesRead;
