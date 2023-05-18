@@ -37,7 +37,6 @@ public class UserKernel extends ThreadedKernel {
 	}
 
 	private static void initializeMemory(){
-		Machine.interrupt().disable();
 		if (intialized == 0){
 			intialized = 1;
 
@@ -48,7 +47,6 @@ public class UserKernel extends ThreadedKernel {
 			}
 
 		}
-		Machine.interrupt().enable();
 	}
 
 	/**
