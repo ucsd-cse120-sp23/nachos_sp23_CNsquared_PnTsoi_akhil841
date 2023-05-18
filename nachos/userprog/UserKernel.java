@@ -37,6 +37,7 @@ public class UserKernel extends ThreadedKernel {
 	}
 
 	private static void initializeMemory(){
+		
 		if (intialized == 0){
 			intialized = 1;
 
@@ -47,6 +48,7 @@ public class UserKernel extends ThreadedKernel {
 			}
 
 		}
+		System.out.println("Memory intialized");
 	}
 
 	/**
