@@ -513,13 +513,13 @@ public class UserProcess {
 			// System.out.println("set parent to ready");
 			finished = true;
 			this.thread.finish();
-			return 0;
+			return status;
 		} else {
 			// otherwise, terminate (we are at the root)
 			// System.out.println("huh? no parent");
 			Kernel.kernel.terminate();
 			this.thread.finish();
-			return 0;
+			return status;
 		}
 	}
 
