@@ -797,7 +797,7 @@ public class UserProcess {
 		if (child.finished) {
 			int code = child.exitStatus;
 			byte[] mem = new byte[4];
-			Lib.bytesFromInt(mem, 0, code);
+			Lib.bytesFromInt( code);
 			writeVirtualMemory(ecAddr, mem);
 			// return 1 if normal execution, 0 if exception.
 			return (code != 0) ? 0 : 1;
@@ -807,6 +807,9 @@ public class UserProcess {
 		child.thread.join();
 		// Machine.interrupt().enable();
 		int code = child.exitStatus;
+		Lib.bytesFromInt( code);
+		byte[] mem = new byte[4];
+		writeVirtualMemory(ecAddr, mem);
 		// return 1 if normal execution, 0 if exception.
 		return (code != 0) ? 0 : 1;
 	}
