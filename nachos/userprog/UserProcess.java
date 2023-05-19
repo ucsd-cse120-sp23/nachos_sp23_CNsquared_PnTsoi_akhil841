@@ -176,7 +176,7 @@ public class UserProcess {
 
 	
 			//the amount that we read from this page is either the entire page( starting at the paddr) or the remainder of what we are supposed to copy
-			int amount = Math.min(length - amountCopied, pageSize - Processor.offsetFromAddress(paddr));
+			int amount = Math.min(length - amountCopied, pageSize - Processor.offsetFromAddress(vaddr));
 			//writes it to the data 
 			System.arraycopy(memory, paddr, data, offset + amountCopied, amount);
 			amountCopied += amount;
