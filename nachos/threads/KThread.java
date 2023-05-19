@@ -210,6 +210,9 @@ public class KThread {
 			currentThread.parent.ready();
 			currentThread.parent.child = null;
 		}
+		else {
+			System.out.println("no parent");
+		}
 		
 		currentThread.parent = null;
 		currentThread.child = null;
