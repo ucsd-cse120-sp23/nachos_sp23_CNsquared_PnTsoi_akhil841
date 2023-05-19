@@ -199,7 +199,7 @@ public class UserProcess {
 		if(vpn >= pageTable.length || vpn < 0){
 			return -1;
 		}
-		if(!pageTable[vpn].valid) return -1;
+		//if(!pageTable[vpn].valid) return -1;
 		//pageTable[vpn].used = true;
 		int ppn = pageTable[vpn].ppn;
 

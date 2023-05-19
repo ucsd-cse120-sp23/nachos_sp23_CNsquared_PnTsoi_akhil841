@@ -100,7 +100,7 @@ public class UserKernel extends ThreadedKernel {
 
 		UserProcess process = ((UThread) KThread.currentThread()).process;
 		int cause = Machine.processor().readRegister(Processor.regCause);
-		System.out.println(cause);
+		System.out.println("Expection caught: " + cause);
 		process.handleException(cause);
 	}
 
