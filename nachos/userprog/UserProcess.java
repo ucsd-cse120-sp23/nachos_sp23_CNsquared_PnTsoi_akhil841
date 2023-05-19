@@ -513,13 +513,13 @@ public class UserProcess {
 			// System.out.println("set parent to ready");
 			finished = true;
 			this.thread.finish();
-			return status;
+			return 0;
 		} else {
 			// otherwise, terminate (we are at the root)
 			// System.out.println("huh? no parent");
 			Kernel.kernel.terminate();
 			this.thread.finish();
-			return status;
+			return 0;
 		}
 	}
 
@@ -968,7 +968,7 @@ public class UserProcess {
 
 	public static int freeProcessID = 1;
 
-	private int exitStatus;
+	private int exitStatus = 0;
 
 	private Lock rwLock = new Lock();
 }
