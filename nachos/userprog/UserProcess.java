@@ -505,6 +505,7 @@ public class UserProcess {
 			i.parent = null;
 		}
 		this.exitStatus = status;
+		
 		// if this process has a parent, tell it that this process
 		// is finished
 		if (parent != null) {
@@ -514,11 +515,13 @@ public class UserProcess {
 			parent.thread.ready();
 			Machine.interrupt().enable();
 			finished = true;
+			this.thread.finish();
 			return 0;
 		} else {
 			// otherwise, terminate (we are at the root)
 			System.out.println("huh? no parent");
 			Kernel.kernel.terminate();
+			this.thread.finish();
 			return status;
 		}
 	}
