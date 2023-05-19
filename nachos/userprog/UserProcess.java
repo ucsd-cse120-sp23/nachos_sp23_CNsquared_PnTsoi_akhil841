@@ -249,9 +249,13 @@ public class UserProcess {
 		int amountWritten = 0;
 		int paddr;
 
+		System.out.println("writeVirtualMemory starts");
+
 		//loop for reading memory page by page
 
 		while(amountWritten < length){
+			System.out.println("length: " + length);
+
 
 			//get the physical address from virtual adresss
 			paddr = getPaddr(vaddr);
@@ -264,11 +268,14 @@ public class UserProcess {
 	
 			//the amount that we write to this page is either the entire page( starting at the paddr) or the remainder of what we are supposed to write
 			int amount = Math.min(length - amountWritten, pageSize - Processor.offsetFromAddress(paddr));
+			System.out.println("amount: " + amount);
+
 			//writes it to the data 
 			System.arraycopy(data, offset + amountWritten, memory, paddr, amount);
 			amountWritten += amount;
 			//offsets the virtual address
 			vaddr += amount;
+			System.out.println("vaddr: " + vaddr);
 			
 		}
 		rwLock.release();

@@ -15,13 +15,17 @@ main (int argc, char *argv[])
 {
     char *str = "\nroses are red\nviolets are blue\nI love Nachos\nand so do you\n\n";
     
+	int i = 1;
     while (*str) {
+	printf(i + ".1\n");
 	int r = write (1, str, 1);
+	printf(i + ".2\n");
 	if (r != 1) {
 	    printf ("failed to write character (r = %d)\n", r);
 	    exit (-1);
 	}
 	str++;
+	i++;
     }
 
     return 0;
