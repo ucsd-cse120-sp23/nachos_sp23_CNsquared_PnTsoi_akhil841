@@ -417,7 +417,7 @@ public class UserProcess {
 
 				//create translation entry from vpn to ppn 
 				pageTable[vpn] = new TranslationEntry(vpn, ppn,true, section.isReadOnly(), false, false);
-				section.loadPage(vpn, ppn);
+				section.loadPage(i, ppn);
 				lastVpn = vpn;
 			}
 		}
