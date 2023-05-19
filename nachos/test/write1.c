@@ -17,9 +17,9 @@ main (int argc, char *argv[])
     
 	int i = 1;
     while (*str) {
-	printf(i + ".1\n");
+	//printf(i + ".1\n");
 	int r = write (1, str, 1);
-	printf(i + ".2\n");
+	//printf(i + ".2\n");
 	if (r != 1) {
 	    printf ("failed to write character (r = %d)\n", r);
 	    exit (-1);
