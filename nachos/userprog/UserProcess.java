@@ -588,6 +588,10 @@ public class UserProcess {
 		child.parent = this;
 		child.load(programName, args);
 
+		Machine.interrupt().disable();
+		child.thread.ready();
+		Machine.interrupt().enable();
+
 		//Machine.interrupt().enable();
 		System.out.println("executed " + child.processID);
 		return child.processID;
@@ -800,6 +804,8 @@ public class UserProcess {
 		child.exitCodeAddr = ecAddr;
 		//wait for child to finish
 		System.out.println("waiting for: " + processID);
+
+		thread.yield();
 		while (!child.finished){
 		
 			//System.out.println("waiting");
