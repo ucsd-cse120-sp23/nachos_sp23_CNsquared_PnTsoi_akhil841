@@ -568,16 +568,12 @@ public class UserProcess {
 		}
 
 		// create new process
+
 		UserProcess child = UserProcess.newUserProcess();
+		child.execute(programName, args);
 		children.add(child);
 		child.parent = this;
-		child.load(programName, args);
-		Machine.interrupt().disable();
-		child.thread = new UThread(child);
-		child.thread.parent = this.thread;
 		System.out.println("child thread created and readied");
-		child.thread.ready();
-		Machine.interrupt().enable();
 		child.exitStatus = 0;
 		// Machine.interrupt().enable();
 		System.out.println("executed " + child.processID);
