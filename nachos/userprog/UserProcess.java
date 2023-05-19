@@ -794,9 +794,9 @@ public class UserProcess {
 			return (code != 0) ? 0 : 1;
 		}
 		// wait for child to finish
-		Machine.interrupt().disable();
+		// Machine.interrupt().disable();
 		child.thread.join();
-		Machine.interrupt().enable();
+		// Machine.interrupt().enable();
 		int code = child.exitStatus;
 		// return 1 if normal execution, 0 if exception.
 		return (code != 0) ? 0 : 1;
