@@ -440,7 +440,8 @@ public class UserProcess {
 		//go through pagetable and free all of the physical pages
 		for(int i = 0; i < pageTable.length; i++){
 			TranslationEntry entry = pageTable[i];
-			UserKernel.freePPN(entry.ppn);
+			if(entry != null)
+				UserKernel.freePPN(entry.ppn);
 
 			pageTable[i] = null;
 		}
