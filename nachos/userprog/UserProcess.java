@@ -503,6 +503,7 @@ public class UserProcess {
 		for (UserProcess i : children) {
 			i.parent = null;
 		}
+		this.thread.finish();
 		this.exitStatus = status;
 		// if this process has a parent, tell it that this process
 		// is finished
