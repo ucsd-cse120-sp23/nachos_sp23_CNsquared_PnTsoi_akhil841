@@ -658,12 +658,19 @@ public class UserProcess {
 			return -1;
 		//get file name (must be 256 bytes or less)
 		String fname = readVirtualMemoryString(naddr, 256);
-		
-		int fileIdx = fileIndexLinearSearch();
+		int fileIdx = -1;
+		boolean alreadyOpened = false;
+		for (int i = 0; i < files.length; i++)
+		{
+			if (files[i] == null && fileIdx == -1)
+				fileIdx = i;
+			if (files[i].getName().equals(fname))
+				alreadyOpened = true;
+		}
 		if (fileIdx != -1)
 		{
-			//remove file if it exists
-			ThreadedKernel.fileSystem.remove(fname);
+			//remove file if it exists and we don't have it open
+			if (!alreadyOpened) ThreadedKernel.fileSystem.remove(fname);
 			//create new file
 			OpenFile newFile = ThreadedKernel.fileSystem.open(fname, true);
 			files[fileIdx] = newFile;
