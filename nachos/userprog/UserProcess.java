@@ -796,9 +796,8 @@ public class UserProcess {
 		// if child is finished, return immediately.
 		if (child.finished) {
 			int code = child.exitStatus;
-			byte[] mem = new byte[4];
-			Lib.bytesFromInt( code);
-			writeVirtualMemory(ecAddr, mem);
+			byte[] mem = Lib.bytesFromInt( code);
+			writeVirtualMemory(ecAddr, mem, 0, 4);
 			// return 1 if normal execution, 0 if exception.
 			return (code != 0) ? 0 : 1;
 		}
@@ -807,9 +806,8 @@ public class UserProcess {
 		child.thread.join();
 		// Machine.interrupt().enable();
 		int code = child.exitStatus;
-		Lib.bytesFromInt( code);
-		byte[] mem = new byte[4];
-		writeVirtualMemory(ecAddr, mem);
+		byte[] mem = Lib.bytesFromInt( code);
+		writeVirtualMemory(ecAddr, mem, 0, 4);
 		// return 1 if normal execution, 0 if exception.
 		return (code != 0) ? 0 : 1;
 	}
@@ -934,6 +932,7 @@ public class UserProcess {
 				break;
 
 			default:
+
 				Lib.debug(dbgProcess, "Unexpected exception: "
 						+ Processor.exceptionNames[cause]);
 				Lib.assertNotReached("Unexpected exception");
