@@ -199,15 +199,10 @@ public class UserProcess {
 		if(vpn >= pageTable.length || vpn < 0){
 			return -1;
 		}
-		//if(!pageTable[vpn].valid) return -1;
+
+		if(!pageTable[vpn].valid) return -1;
 		//pageTable[vpn].used = true;
 		int ppn = pageTable[vpn].ppn;
-
-		for(int i = 0; i < pageTable.length; i++){
-			if(pageTable[i] != null && pageTable[i].vpn == vpn){
-				ppn = pageTable[i].ppn;
-			}
-		}
 
 
 		paddr = Processor.makeAddress(ppn, addrOffest);
@@ -263,7 +258,7 @@ public class UserProcess {
 			if (paddr < 0 || paddr >= memory.length || !validWrite(vaddr))
 			{
 				rwLock.release();
-				return -1;
+				return amountWritten;
 			}
 
 	
@@ -962,5 +957,5 @@ public class UserProcess {
 
 	public static int freeProcessID = 1;
 
-	private Lock rwLock;
+	private Lock rwLock = new Lock();
 }
