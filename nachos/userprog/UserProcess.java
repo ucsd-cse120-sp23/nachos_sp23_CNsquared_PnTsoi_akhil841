@@ -663,7 +663,7 @@ public class UserProcess {
 		for (int i = 0; i < files.length; i++) {
 			if (files[i] == null && fileIdx == -1)
 				fileIdx = i;
-			if (files[i].getName().equals(fname))
+			if (files[i] != null && files[i].getName().equals(fname))
 				alreadyOpened = true;
 		}
 		if (fileIdx != -1) {
