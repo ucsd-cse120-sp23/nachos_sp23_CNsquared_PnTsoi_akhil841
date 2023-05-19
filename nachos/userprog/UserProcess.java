@@ -893,6 +893,7 @@ public class UserProcess {
 			case syscallHalt:
 				return handleHalt();
 			case syscallExit:
+				System.out.println("call " + syscall);
 				return handleExit(a0);
 			case syscallJoin:
 				return handleJoin(a0, a1);
