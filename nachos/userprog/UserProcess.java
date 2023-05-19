@@ -519,7 +519,7 @@ public class UserProcess {
 			System.out.println("huh? no parent");
 			Kernel.kernel.terminate();
 			this.thread.finish();
-			return status;
+			return 0;
 		}
 	}
 
