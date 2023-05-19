@@ -484,7 +484,7 @@ public class UserProcess {
 	/**
 	 * Handle the exit() system call.
 	 */
-	private int handleExit(int status) {
+	private int handleExit(Integer status) {
 		// Do not remove this call to the autoGrader...
 		Machine.autoGrader().finishingCurrentProcess(status);
 		// System.out.println("reached exit syscall");
@@ -788,21 +788,21 @@ public class UserProcess {
 			return -1;
 		// if child is finished, return immediately.
 		if (child.finished) {
-			int code = child.exitStatus;
+			Integer code = child.exitStatus;
 			byte[] mem = Lib.bytesFromInt( code);
 			writeVirtualMemory(ecAddr, mem, 0, 4);
 			// return 1 if normal execution, 0 if exception.
-			return (code != 0) ? 0 : 1;
+			return (code == null) ? 0 : 1;
 		}
 		// wait for child to finish
 		// Machine.interrupt().disable();
 		child.thread.join();
 		// Machine.interrupt().enable();
-		int code = child.exitStatus;
+		Integer code = child.exitStatus;
 		byte[] mem = Lib.bytesFromInt( code);
 		writeVirtualMemory(ecAddr, mem, 0, 4);
 		// return 1 if normal execution, 0 if exception.
-		return (code != 0) ? 0 : 1;
+		return (code == null) ? 0 : 1;
 	}
 
 	private static final int syscallHalt = 0, syscallExit = 1, syscallExec = 2,
@@ -925,9 +925,9 @@ public class UserProcess {
 				break;
 
 			default:
-
 				Lib.debug(dbgProcess, "Unexpected exception: "
 						+ Processor.exceptionNames[cause]);
+				handleExit(null);
 				Lib.assertNotReached("Unexpected exception");
 		}
 	}
@@ -968,7 +968,7 @@ public class UserProcess {
 
 	public static int freeProcessID = 1;
 
-	private int exitStatus = 0;
+	private Integer exitStatus = 0;
 
 	private Lock rwLock = new Lock();
 }
