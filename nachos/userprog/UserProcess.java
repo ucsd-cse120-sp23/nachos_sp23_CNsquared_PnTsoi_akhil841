@@ -718,6 +718,8 @@ public class UserProcess {
 			Lib.debug(dbgProcess,  "No space for " + name);
 			return -1;
 		}
+
+		files[filesIndex] = returned;
 	
 		return filesIndex;
 	}
@@ -757,7 +759,7 @@ public class UserProcess {
 
 		files[fileDescriptor] = null;
 
-		return -1;
+		return 0;
 	}
 
 	private int handleJoin(int processID, int ecAddr) {
