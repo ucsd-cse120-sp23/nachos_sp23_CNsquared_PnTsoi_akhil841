@@ -581,6 +581,7 @@ public final class Processor {
 	private static final char dbgFullDisassemble = 'M';
 
 	private class ProcessorPrivilege implements Privilege.ProcessorPrivilege {
+  @Override
 		public void flushPipe() {
 			finishLoad();
 		}

@@ -249,7 +249,7 @@ public class UserProcess {
 		int amountWritten = 0;
 		int paddr;
 
-		System.out.println("writeVirtualMemory starts");
+		//System.out.println("writeVirtualMemory starts");
 
 		//loop for reading memory page by page
 
@@ -304,7 +304,7 @@ public class UserProcess {
 	 * @return <tt>true</tt> if the executable was successfully loaded.
 	 */
 	private boolean load(String name, String[] args) {
-		System.out.println("Attempting load");
+		//System.out.println("Attempting load");
 		Lib.debug(dbgProcess, "UserProcess.load(\"" + name + "\")");
 
 		OpenFile executable = ThreadedKernel.fileSystem.open(name, false);
@@ -378,7 +378,7 @@ public class UserProcess {
 			stringOffset += 1;
 		}
 
-		System.out.println("loaded");
+		//System.out.println("loaded");
 
 		return true;
 	}
@@ -391,7 +391,7 @@ public class UserProcess {
 	 * @return <tt>true</tt> if the sections were successfully loaded.
 	 */
 	protected boolean loadSections() {
-		System.out.println("attempting loading sections");
+		//System.out.println("attempting loading sections");
 		int lastVpn = 0;
 		
 		if (numPages > Machine.processor().getNumPhysPages()) {
@@ -434,7 +434,7 @@ public class UserProcess {
 
 		
 
-		System.out.println("loaded sections");
+		//System.out.println("loaded sections");
 
 		return true;
 	}
@@ -538,7 +538,7 @@ public class UserProcess {
 
 	private int handleExec(String programName, int argc, int ptrArray) {
 		//Machine.interrupt().disable();
-		System.out.println("attempting exec");
+		//System.out.println("attempting exec");
 		if(programName == null) {
 			//Machine.interrupt().enable();
 			return -1;
@@ -583,7 +583,7 @@ public class UserProcess {
 		child.load(programName, args);
 
 		//Machine.interrupt().enable();
-		System.out.println("executed");
+		//System.out.println("executed");
 		return child.processID;
 	}
 

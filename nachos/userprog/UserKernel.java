@@ -48,7 +48,7 @@ public class UserKernel extends ThreadedKernel {
 			}
 
 		}
-		System.out.println("Memory intialized");
+		//System.out.println("Memory intialized");
 	}
 
 	/**
