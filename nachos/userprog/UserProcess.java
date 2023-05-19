@@ -795,6 +795,7 @@ public class UserProcess {
 		//otherwise, pass ecAddr to child process
 		child.exitCodeAddr = ecAddr;
 		//wait for child to finish
+		System.out.println("waiting for: " + processID);
 		while (!child.finished){
 		
 			//System.out.println("waiting");
