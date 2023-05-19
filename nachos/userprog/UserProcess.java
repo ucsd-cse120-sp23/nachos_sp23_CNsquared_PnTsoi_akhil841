@@ -267,7 +267,7 @@ public class UserProcess {
 
 	
 			//the amount that we write to this page is either the entire page( starting at the paddr) or the remainder of what we are supposed to write
-			int amount = Math.min(length - amountWritten, pageSize - Processor.offsetFromAddress(paddr));
+			int amount = Math.min(length - amountWritten, pageSize - Processor.offsetFromAddress(vaddr));
 			System.out.println("amount: " + amount);
 
 			//writes it to the data 

@@ -141,7 +141,7 @@ public class UserKernel extends ThreadedKernel {
 	}
 
 	public static int getPPN(){
-		Machine.interrupt().disable();
+		//Machine.interrupt().disable();
 
 		if(physicalMemoryAvail == null){
 			initializeMemory();
@@ -149,10 +149,10 @@ public class UserKernel extends ThreadedKernel {
 
 
 		if(physicalMemoryAvail.size() > 0){
-			Machine.interrupt().enable();
+			//Machine.interrupt().enable();
 			return physicalMemoryAvail.pop();
 		}
-		Machine.interrupt().enable();
+		//Machine.interrupt().enable();
 		return -1;
 
 		
@@ -160,14 +160,14 @@ public class UserKernel extends ThreadedKernel {
 
 	public static int freePPN(int page){
 	
-		Machine.interrupt().disable();
+		//Machine.interrupt().disable();
 		if(physicalMemoryAvail.contains(page)){
-			Machine.interrupt().enable();
+			//Machine.interrupt().enable();
 			return -1;
 		}
 
 		physicalMemoryAvail.add(page);
-		Machine.interrupt().enable();
+		//Machine.interrupt().enable();
 		return 0;
 
 	}
