@@ -587,8 +587,11 @@ public class UserProcess {
 		children.add(child);	
 		child.parent = this;
 		child.load(programName, args);
-		UThread thread = new UThread(child);
 		child.thread = thread;
+
+		Machine.interrupt().disable();
+		child.thread.ready();
+		Machine.interrupt().enable();
 
 		//Machine.interrupt().enable();
 		System.out.println("executed " + child.processID);
