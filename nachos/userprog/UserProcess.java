@@ -514,18 +514,14 @@ public class UserProcess {
 		{
 			i.parent = null;
 		}
-		// write the exit code at the address, if it's not null
-		if (exitCodeAddr != 0)
-		{
-			//the system is little endian
-			byte[] exitStatus = new byte[4];
-			Lib.bytesFromInt(exitStatus, 0, status);
-			writeVirtualMemory(exitCodeAddr, exitStatus);
-		}
+		this.exitStatus = status;
 		// if this process has a parent, tell it that this process
 		// is finished
 		if (parent != null)
 		{
+			Machine.interrupt().disable();
+			parent.thread.ready();
+			Machine.interrupt().enable();
 			finished = true;
 			return 0;
 		}
@@ -581,7 +577,11 @@ public class UserProcess {
 		children.add(child);	
 		child.parent = this;
 		child.load(programName, args);
-
+		child.thread = new UThread(child);
+		Machine.interrupt().disable();
+		child.thread.ready();
+		Machine.interrupt().enable();
+		child.exitStatus = 0;
 		//Machine.interrupt().enable();
 		//System.out.println("executed");
 		return child.processID;
@@ -781,24 +781,18 @@ public class UserProcess {
 		//if child is finished, return immediately.
 		if (child.finished)
 		{
-			byte[] statusInfoBytes = new byte[4];
-			//read status code
-			readVirtualMemory(ecAddr, statusInfoBytes);
-			//get status code
-			int code = Lib.bytesToInt(statusInfoBytes, 0);
+			int code = child.exitStatus;
+			byte[] mem = new byte[4];
+			Lib.bytesFromInt(mem, 0, code);
+			writeVirtualMemory(ecAddr, mem);
 			//return 1 if normal execution, 0 if exception.
 			return (code != 0) ? 0 : 1;
 		}
-		//otherwise, pass ecAddr to child process
-		child.exitCodeAddr = ecAddr;
 		//wait for child to finish
-		while (!child.finished);
-		//get code and return
-		byte[] statusInfoBytes = new byte[4];
-		//read status code
-		readVirtualMemory(ecAddr, statusInfoBytes);
-		//get status code
-		int code = Lib.bytesToInt(statusInfoBytes, 0);
+		Machine.interrupt().disable();
+		KThread.sleep();
+		Machine.interrupt().enable();
+		int code = child.exitStatus;
 		//return 1 if normal execution, 0 if exception.
 		return (code != 0) ? 0 : 1;
 	}
@@ -957,14 +951,14 @@ public class UserProcess {
 	private UserProcess parent = null;
 
 	private ArrayList<UserProcess> children = new ArrayList<>();
-
-	private int exitCodeAddr = 0;
 	
 	private boolean finished = false;
 
 	public int processID;
 
 	public static int freeProcessID = 1;
+
+	private int exitStatus;
 
 	private Lock rwLock = new Lock();
 }
