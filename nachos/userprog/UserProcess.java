@@ -557,7 +557,7 @@ public class UserProcess {
 				//Machine.interrupt().enable();
 				return -1;
 			}
-			int addr_i = Lib.bytesToInt(argBytes, offset);
+			int addr_i = Lib.bytesToInt(argBytes, 0);
 			if(addr_i < 0) {
 				//Machine.interrupt().enable();
 				return -1;
