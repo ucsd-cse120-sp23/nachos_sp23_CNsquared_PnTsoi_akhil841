@@ -620,7 +620,6 @@ public class UserProcess {
 	
 	private int handleWrite(int fileDescriptor, int vaddr, int count) {
 		//check for invalid file descriptor
-		System.out.println("HEREREHREHRERE");
 		if (fileDescriptor < 0 || fileDescriptor >= 16) return -1;
 		//check for invalid count
 		if (count < 0) return -1;
