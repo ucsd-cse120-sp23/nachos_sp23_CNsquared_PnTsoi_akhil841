@@ -196,7 +196,7 @@ public class UserProcess {
 		int vpn = Processor.pageFromAddress(vaddr);
 		int addrOffest = Processor.offsetFromAddress(vaddr);
 
-		if(vpn >= pageTable.length || vpn < 0){
+		if(vpn >= pageTable.length || vpn < 0 || pageTable[vpn] == null){
 			return -1;
 		}
 
