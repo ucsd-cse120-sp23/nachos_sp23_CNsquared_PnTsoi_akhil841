@@ -571,6 +571,7 @@ public class UserProcess {
 		child.parent = this;
 		child.load(programName, args);
 		child.thread = new UThread(child);
+		child.thread.parent = this.thread;
 		Machine.interrupt().disable();
 		child.thread.ready();
 		Machine.interrupt().enable();
