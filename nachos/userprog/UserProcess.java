@@ -502,6 +502,7 @@ public class UserProcess {
 		// can grade your implementation.
 
 		Lib.debug(dbgProcess, "UserProcess.handleExit (" + status + ")");
+		System.out.println("Exiting " + processID);
 		// close all open files
 		for (OpenFile i : files) {
 			if (i != null)
@@ -534,9 +535,13 @@ public class UserProcess {
 
 	private int handleExec(String programName, int argc, int ptrArray) {
 		//Machine.interrupt().disable();
-		//System.out.println("attempting exec");
+		System.out.println("attempting exec");
 		if(programName == null) {
 			//Machine.interrupt().enable();
+			return -1;
+		}
+
+		if(!programName.endsWith(".coff")) {
 			return -1;
 		}
 		if(argc < 0) {
@@ -583,7 +588,7 @@ public class UserProcess {
 		Machine.interrupt().enable();
 		child.exitStatus = 0;
 		//Machine.interrupt().enable();
-		//System.out.println("executed");
+		System.out.println("executed " + child.processID);
 		return child.processID;
 	}
 
@@ -764,6 +769,7 @@ public class UserProcess {
 
 	private int handleJoin(int processID, int ecAddr) {
 		//check for nullptr
+		System.out.println("Join starting: Joining " + this.processID + " to " + processID);
 		if (ecAddr == 0)
 			return -1;
 		//get child process, if it exists
