@@ -537,14 +537,14 @@ public class UserProcess {
 	}
 
 	private int handleExec(String programName, int argc, int ptrArray) {
-		Machine.interrupt().disable();
+		//Machine.interrupt().disable();
 		System.out.println("attempting exec");
 		if(programName == null) {
-			Machine.interrupt().enable();
+			//Machine.interrupt().enable();
 			return -1;
 		}
 		if(argc < 0) {
-			Machine.interrupt().enable();
+			//Machine.interrupt().enable();
 			return -1;
 		}
 		// get arguments in ptrArray
@@ -554,12 +554,12 @@ public class UserProcess {
 		for(int i = 0; i < argc; i++) {
 			int cec = readVirtualMemory(ptrArray+offset, argBytes, 0, 4);
 			if(cec != 4) {
-				Machine.interrupt().enable();
+				//Machine.interrupt().enable();
 				return -1;
 			}
 			int addr_i = Lib.bytesToInt(argBytes, offset);
 			if(addr_i < 0) {
-				Machine.interrupt().enable();
+				//Machine.interrupt().enable();
 				return -1;
 			}
 			argArray[i] = addr_i;
@@ -571,7 +571,7 @@ public class UserProcess {
 		for(int i = 0; i < argc; i++) {
 			args[i] = readVirtualMemoryString(argArray[i], 256);
 			if(args[i] == null) {
-				Machine.interrupt().enable();
+				//Machine.interrupt().enable();
 				return -1;
 			}
 		}
@@ -582,7 +582,7 @@ public class UserProcess {
 		child.parent = this;
 		child.load(programName, args);
 
-		Machine.interrupt().enable();
+		//Machine.interrupt().enable();
 		System.out.println("executed");
 		return child.processID;
 	}
