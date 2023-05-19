@@ -569,10 +569,11 @@ public class UserProcess {
 		UserProcess child = UserProcess.newUserProcess();
 		children.add(child);
 		child.parent = this;
-		child.thread = new UThread(child);
 		child.load(programName, args);
-		child.thread.parent = this.thread;
 		Machine.interrupt().disable();
+		child.thread = new UThread(child);
+		child.thread.parent = this.thread;
+		System.out.println("child thread created and readied");
 		child.thread.ready();
 		Machine.interrupt().enable();
 		child.exitStatus = 0;
