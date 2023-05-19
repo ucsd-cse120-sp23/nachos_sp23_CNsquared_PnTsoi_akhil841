@@ -545,6 +545,10 @@ public class UserProcess {
 			//Machine.interrupt().enable();
 			return -1;
 		}
+
+		if(!programName.endsWith(".coff")) {
+			return -1;
+		}
 		if(argc < 0) {
 			//Machine.interrupt().enable();
 			return -1;
