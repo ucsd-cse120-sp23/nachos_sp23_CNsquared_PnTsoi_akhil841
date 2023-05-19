@@ -898,6 +898,7 @@ public class UserProcess {
 				return handleJoin(a0, a1);
 
 			default:
+				System.out.println("Unknown syscall " + syscall);
 				Lib.debug(dbgProcess, "Unknown syscall " + syscall);
 				Lib.assertNotReached("Unknown system call!" + syscall);
 		}
