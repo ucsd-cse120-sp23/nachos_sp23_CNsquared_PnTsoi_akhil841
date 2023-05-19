@@ -540,7 +540,7 @@ public class UserProcess {
 
 	private int handleExec(String programName, int argc, int ptrArray) {
 		//Machine.interrupt().disable();
-		System.out.println("attempting exec for " + processID);
+		System.out.println("attempting exec");
 		if(programName == null) {
 			//Machine.interrupt().enable();
 			return -1;
@@ -585,7 +585,7 @@ public class UserProcess {
 		child.load(programName, args);
 
 		//Machine.interrupt().enable();
-		System.out.println("executed " + processID);
+		System.out.println("executed " + child.processID);
 		return child.processID;
 	}
 
@@ -766,6 +766,7 @@ public class UserProcess {
 
 	private int handleJoin(int processID, int ecAddr) {
 		//check for nullptr
+		System.out.println("Join starting: Joining " + this.processID + " to " + processID);
 		if (ecAddr == 0)
 			return -1;
 		//get child process, if it exists
