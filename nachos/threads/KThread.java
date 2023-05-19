@@ -194,6 +194,7 @@ public class KThread {
 	 */
 	public static void finish() {
 		Lib.debug(dbgThread, "Finishing thread: " + currentThread.toString());
+		System.out.println("reached finish()");
 
 		Machine.interrupt().disable();
 
@@ -204,6 +205,7 @@ public class KThread {
 
 		currentThread.status = statusFinished;
 		if(currentThread.parent != null) {
+			System.out.println("wake parent up");
 
 			currentThread.parent.ready();
 			currentThread.parent.child = null;
