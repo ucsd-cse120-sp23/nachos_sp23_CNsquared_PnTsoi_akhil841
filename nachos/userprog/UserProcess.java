@@ -487,6 +487,7 @@ public class UserProcess {
 	private int handleExit(int status) {
 		// Do not remove this call to the autoGrader...
 		Machine.autoGrader().finishingCurrentProcess(status);
+		System.out.println("reached exit syscall");
 		// ...and leave it as the top of handleExit so that we
 		// can grade your implementation.
 
