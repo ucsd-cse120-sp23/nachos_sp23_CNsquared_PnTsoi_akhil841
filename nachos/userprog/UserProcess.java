@@ -507,6 +507,8 @@ public class UserProcess {
 		// if this process has a parent, tell it that this process
 		// is finished
 		if (parent != null) {
+			System.out.println("Parent is " + parent.processID);
+			System.out.println("set parent to ready");
 			Machine.interrupt().disable();
 			parent.thread.ready();
 			Machine.interrupt().enable();
