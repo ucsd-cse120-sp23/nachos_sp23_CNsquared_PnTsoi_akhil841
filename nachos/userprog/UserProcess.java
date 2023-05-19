@@ -390,6 +390,7 @@ public class UserProcess {
 	 */
 	protected boolean loadSections() {
 		System.out.println("attempting loading sections");
+		int lastVpn = 0;
 		
 		if (numPages > Machine.processor().getNumPhysPages()) {
 			coff.close();
@@ -415,10 +416,21 @@ public class UserProcess {
 				}
 
 				//create translation entry from vpn to ppn 
-				pageTable[i] = new TranslationEntry(vpn, ppn,true, section.isReadOnly(), false, false);
-				section.loadPage(i, ppn);
+				pageTable[vpn] = new TranslationEntry(vpn, ppn,true, section.isReadOnly(), false, false);
+				section.loadPage(vpn, ppn);
+				lastVpn = vpn;
 			}
 		}
+
+		for(int i = 0; i < 9; i++){
+
+			int ppn = UserKernel.getPPN();
+			int vpn = lastVpn + i + 1;
+
+			pageTable[vpn] = new TranslationEntry(vpn, ppn,true, false, false, false);
+		}
+
+		
 
 		System.out.println("loaded sections");
 
