@@ -1,5 +1,7 @@
 package nachos.userprog;
 
+import java.util.LinkedList;
+
 import nachos.machine.*;
 import nachos.threads.*;
 import nachos.userprog.*;
@@ -20,8 +22,10 @@ public class UserKernel extends ThreadedKernel {
 	 * processor's exception handler.
 	 */
 	public void initialize(String[] args) {
+		
+		
 		super.initialize(args);
-
+		initLock = new Lock();
 		console = new SynchConsole(Machine.console());
 
 		Machine.processor().setExceptionHandler(new Runnable() {
@@ -29,6 +33,22 @@ public class UserKernel extends ThreadedKernel {
 				exceptionHandler();
 			}
 		});
+		
+	}
+
+	private static void initializeMemory(){
+		
+		if (intialized == 0){
+			intialized = 1;
+
+			physicalMemoryAvail = new LinkedList<Integer>();
+
+			for(int i = 0; i < Machine.processor().getNumPhysPages(); i++ ){
+				physicalMemoryAvail.add(i);
+			}
+
+		}
+		//System.out.println("Memory intialized");
 	}
 
 	/**
@@ -119,9 +139,49 @@ public class UserKernel extends ThreadedKernel {
 		super.terminate();
 	}
 
+	public static int getPPN(){
+		//Machine.interrupt().disable();
+		initLock.acquire();
+		if(physicalMemoryAvail == null){
+			initializeMemory();
+		}
+
+
+		if(physicalMemoryAvail.size() > 0){
+			initLock.release();
+			//Machine.interrupt().enable();
+			return physicalMemoryAvail.pop();
+		}
+		initLock.release();
+		//Machine.interrupt().enable();
+		return -1;
+
+		
+	}
+
+	public static int freePPN(int page){
+		initLock.acquire();
+		//Machine.interrupt().disable();
+		if(physicalMemoryAvail.contains(page)){
+			initLock.release();
+			//Machine.interrupt().enable();
+			return -1;
+		}
+		initLock.release();
+		physicalMemoryAvail.add(page);
+		//Machine.interrupt().enable();
+		return 0;
+
+	}
+
 	/** Globally accessible reference to the synchronized console. */
 	public static SynchConsole console;
 
+
+	private static LinkedList<Integer> physicalMemoryAvail;
+
 	// dummy variables to make javac smarter
 	private static Coff dummy1 = null;
+	private static int intialized = 0;
+	private static Lock initLock;
 }

@@ -98,6 +98,7 @@ public final class Processor {
 				inst.run();
 			}
 			catch (MipsException e) {
+		
 				e.handle();
 			}
 
@@ -580,6 +581,7 @@ public final class Processor {
 	private static final char dbgFullDisassemble = 'M';
 
 	private class ProcessorPrivilege implements Privilege.ProcessorPrivilege {
+  @Override
 		public void flushPipe() {
 			finishLoad();
 		}
