@@ -540,7 +540,7 @@ public class UserProcess {
 
 	private int handleExec(String programName, int argc, int ptrArray) {
 		//Machine.interrupt().disable();
-		//System.out.println("attempting exec");
+		System.out.println("attempting exec for " + processID);
 		if(programName == null) {
 			//Machine.interrupt().enable();
 			return -1;
@@ -585,7 +585,7 @@ public class UserProcess {
 		child.load(programName, args);
 
 		//Machine.interrupt().enable();
-		//System.out.println("executed");
+		System.out.println("executed " + processID);
 		return child.processID;
 	}
 
