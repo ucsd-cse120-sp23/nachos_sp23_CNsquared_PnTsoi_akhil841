@@ -525,7 +525,7 @@ public class UserProcess {
 
 	private int handleExec(String programName, int argc, int ptrArray) {
 		// Machine.interrupt().disable();
-		System.out.println("attempting exec");
+		System.out.println("attempting exec and now loading");
 		if (programName == null) {
 			// Machine.interrupt().enable();
 			return -1;
