@@ -502,6 +502,7 @@ public class UserProcess {
 		// can grade your implementation.
 
 		Lib.debug(dbgProcess, "UserProcess.handleExit (" + status + ")");
+		System.out.println("Exiting " + processID);
 		// close all open files
 		for (OpenFile i : files) {
 			if (i != null)
@@ -526,6 +527,7 @@ public class UserProcess {
 		// is finished
 		if (parent != null)
 		{
+			System.out.println("Setting ourselves as finished");
 			finished = true;
 			return 0;
 		}
