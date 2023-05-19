@@ -487,12 +487,12 @@ public class UserProcess {
 	private int handleExit(int status) {
 		// Do not remove this call to the autoGrader...
 		Machine.autoGrader().finishingCurrentProcess(status);
-		System.out.println("reached exit syscall");
+		// System.out.println("reached exit syscall");
 		// ...and leave it as the top of handleExit so that we
 		// can grade your implementation.
 
 		Lib.debug(dbgProcess, "UserProcess.handleExit (" + status + ")");
-		System.out.println("Exiting " + processID);
+		// System.out.println("Exiting " + processID);
 		// close all open files
 		for (OpenFile i : files) {
 			if (i != null)
@@ -509,14 +509,14 @@ public class UserProcess {
 		// if this process has a parent, tell it that this process
 		// is finished
 		if (parent != null ) {
-			System.out.println("Parent is " + parent.processID);
-			System.out.println("set parent to ready");
+			// System.out.println("Parent is " + parent.processID);
+			// System.out.println("set parent to ready");
 			finished = true;
 			this.thread.finish();
 			return 0;
 		} else {
 			// otherwise, terminate (we are at the root)
-			System.out.println("huh? no parent");
+			// System.out.println("huh? no parent");
 			Kernel.kernel.terminate();
 			this.thread.finish();
 			return 0;
@@ -525,7 +525,7 @@ public class UserProcess {
 
 	private int handleExec(String programName, int argc, int ptrArray) {
 		// Machine.interrupt().disable();
-		System.out.println("attempting exec and now loading");
+		// System.out.println("attempting exec and now loading");
 		if (programName == null) {
 			// Machine.interrupt().enable();
 			return -1;
@@ -573,10 +573,10 @@ public class UserProcess {
 		child.execute(programName, args);
 		children.add(child);
 		child.parent = this;
-		System.out.println("child thread created and readied");
+		// System.out.println("child thread created and readied");
 		child.exitStatus = 0;
 		// Machine.interrupt().enable();
-		System.out.println("executed " + child.processID);
+		// System.out.println("executed " + child.processID);
 		return child.processID;
 	}
 
@@ -772,7 +772,7 @@ public class UserProcess {
 
 	private int handleJoin(int processID, int ecAddr) {
 		// check for nullptr
-		System.out.println("Join starting: Joining " + this.processID + " to " + processID);
+		// System.out.println("Join starting: Joining " + this.processID + " to " + processID);
 		if (ecAddr == 0)
 			return -1;
 		// get child process, if it exists
@@ -890,13 +890,13 @@ public class UserProcess {
 			case syscallHalt:
 				return handleHalt();
 			case syscallExit:
-				System.out.println("call " + syscall);
+				// System.out.println("call " + syscall);
 				return handleExit(a0);
 			case syscallJoin:
 				return handleJoin(a0, a1);
 
 			default:
-				System.out.println("Unknown syscall " + syscall);
+				// System.out.println("Unknown syscall " + syscall);
 				Lib.debug(dbgProcess, "Unknown syscall " + syscall);
 				Lib.assertNotReached("Unknown system call!" + syscall);
 		}
