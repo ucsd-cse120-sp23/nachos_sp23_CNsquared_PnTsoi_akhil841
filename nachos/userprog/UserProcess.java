@@ -778,10 +778,13 @@ public class UserProcess {
 		// get child process, if it exists
 		UserProcess child = null;
 		boolean found = false;
-		for (UserProcess i : children) {
-			if (i.processID == processID) {
-				child = i;
+		int childIdx = 0;
+		for (int i = 0; i < children.size(); i++) {
+			if (children.get(i) != null && children.get(i).processID == processID) {
+				childIdx = i;
+				child = children.get(i);
 				found = true;
+				break;
 			}
 		}
 		if (!found)
@@ -791,6 +794,9 @@ public class UserProcess {
 			Integer code = child.exitStatus;
 			byte[] mem = Lib.bytesFromInt( code);
 			writeVirtualMemory(ecAddr, mem, 0, 4);
+			//remove child since it's finished. makes this function return -1 if 
+			//join is called on it again, unless we exec it under the same child process.
+			children.remove(childIdx);
 			// return 1 if normal execution, 0 if exception.
 			return (code == null) ? 0 : 1;
 		}
