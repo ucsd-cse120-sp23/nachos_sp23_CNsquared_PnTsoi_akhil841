@@ -279,6 +279,11 @@ public class VMProcess extends UserProcess {
 		if (vpn >= pageTable.length || vpn < 0) {
 			return false;
 		}
+
+		//page fault
+		if (pageTable[vpn] == null || !pageTable[vpn].valid)
+			handlePageFault(vaddr);
+		
 		return !pageTable[vpn].readOnly;
 	}
 
