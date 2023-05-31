@@ -153,6 +153,7 @@ public class VMProcess extends UserProcess {
 			System.out.println("loading section page number " + (processVPN-vpn) + " into ppn " + ppn);
 			System.out.println("processVPN: " + processVPN);
 			System.out.println("VPN: " + vpn);
+			System.out.println("section length " + section.getLength());
 			section.loadPage(processVPN - vpn, ppn);
 			
 
