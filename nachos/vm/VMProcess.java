@@ -99,7 +99,14 @@ public class VMProcess extends UserProcess {
 	 */
  @Override
 	protected void unloadSections() {
-		super.unloadSections();
+		// go through pagetable and free all of the physical pages
+		for (int i = 0; i < pageTable.length; i++) {
+			TranslationEntry entry = pageTable[i];
+			if (entry != null && entry.valid == true)
+				UserKernel.freePPN(entry.ppn);
+
+			pageTable[i] = null;
+		}
 	}
 
 	/**
