@@ -140,7 +140,7 @@ public class VMProcess extends UserProcess {
 			CoffSection section = coff.getSection(i);
 			int vpn = section.getFirstVPN();
 
-			if(vpn + section.getLength() >= processVPN) {
+			if(vpn + section.getLength() <= processVPN) {
 				continue;
 			}
 
