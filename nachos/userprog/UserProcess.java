@@ -401,26 +401,32 @@ public class UserProcess {
 			for (int i = 0; i < section.getLength(); i++) {
 				int vpn = section.getFirstVPN() + i;
 
-				// get availble physical page
-				int ppn = UserKernel.getPPN();
-				// if not return -1
-				if (ppn == -1) {
-					return false;
-				}
+				/* 
+					// get availble physical page
+					int ppn = UserKernel.getPPN();
+					// if not return -1
+					if (ppn == -1) {
+						return false;
+					}
+				*/
 
 				// create translation entry from vpn to ppn
-				pageTable[vpn] = new TranslationEntry(vpn, ppn, true, section.isReadOnly(), false, false);
-				section.loadPage(i, ppn);
+				pageTable[vpn] = new TranslationEntry(vpn, -1, false, section.isReadOnly(), false, false);
+				
+				
+				//section.loadPage(i, ppn);
+				
+				
 				lastVpn = vpn;
 			}
 		}
 
 		for (int i = 0; i < 9; i++) {
 
-			int ppn = UserKernel.getPPN();
+			//int ppn = UserKernel.getPPN();
 			int vpn = lastVpn + i + 1;
 
-			pageTable[vpn] = new TranslationEntry(vpn, ppn, true, false, false, false);
+			pageTable[vpn] = new TranslationEntry(vpn, -1, false, false, false, false);
 		}
 
 		// System.out.println("loaded sections");
