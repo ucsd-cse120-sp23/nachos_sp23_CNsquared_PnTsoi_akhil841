@@ -1,9 +1,7 @@
 package nachos.vm;
 
 import nachos.machine.*;
-import nachos.threads.*;
 import nachos.userprog.*;
-import nachos.vm.*;
 
 /**
  * A <tt>UserProcess</tt> that supports demand-paging.
@@ -20,6 +18,7 @@ public class VMProcess extends UserProcess {
 	 * Save the state of this process in preparation for a context switch.
 	 * Called by <tt>UThread.saveState()</tt>.
 	 */
+ @Override
 	public void saveState() {
 		super.saveState();
 	}
@@ -28,6 +27,7 @@ public class VMProcess extends UserProcess {
 	 * Restore the state of this process after a context switch. Called by
 	 * <tt>UThread.restoreState()</tt>.
 	 */
+ @Override
 	public void restoreState() {
 		super.restoreState();
 	}
@@ -38,6 +38,7 @@ public class VMProcess extends UserProcess {
 	 * 
 	 * @return <tt>true</tt> if successful.
 	 */
+ @Override
 	protected boolean loadSections() {
 		return super.loadSections();
 	}
@@ -45,6 +46,7 @@ public class VMProcess extends UserProcess {
 	/**
 	 * Release any resources allocated by <tt>loadSections()</tt>.
 	 */
+ @Override
 	protected void unloadSections() {
 		super.unloadSections();
 	}
@@ -56,6 +58,7 @@ public class VMProcess extends UserProcess {
 	 * 
 	 * @param cause the user exception that occurred.
 	 */
+ @Override
 	public void handleException(int cause) {
 		Processor processor = Machine.processor();
 

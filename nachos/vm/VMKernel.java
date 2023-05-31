@@ -1,7 +1,5 @@
 package nachos.vm;
 
-import nachos.machine.*;
-import nachos.threads.*;
 import nachos.userprog.*;
 import nachos.vm.*;
 
@@ -19,6 +17,7 @@ public class VMKernel extends UserKernel {
 	/**
 	 * Initialize this kernel.
 	 */
+ @Override
 	public void initialize(String[] args) {
 		super.initialize(args);
 	}
@@ -26,6 +25,7 @@ public class VMKernel extends UserKernel {
 	/**
 	 * Test this kernel.
 	 */
+ @Override
 	public void selfTest() {
 		super.selfTest();
 	}
@@ -33,6 +33,7 @@ public class VMKernel extends UserKernel {
 	/**
 	 * Start running user programs.
 	 */
+ @Override
 	public void run() {
 		super.run();
 	}
@@ -40,6 +41,7 @@ public class VMKernel extends UserKernel {
 	/**
 	 * Terminate this kernel. Never returns.
 	 */
+ @Override
 	public void terminate() {
 		super.terminate();
 	}
