@@ -40,7 +40,58 @@ public class VMProcess extends UserProcess {
 	 */
  @Override
 	protected boolean loadSections() {
-		return super.loadSections();
+		// System.out.println("attempting loading sections");
+		int lastVpn = 0;
+
+		if (numPages > Machine.processor().getNumPhysPages()) {
+			coff.close();
+			Lib.debug(dbgProcess, "\tinsufficient physical memory");
+			return false;
+		}
+
+		// load sections
+		for (int s = 0; s < coff.getNumSections(); s++) {
+			CoffSection section = coff.getSection(s);
+
+			Lib.debug(dbgProcess, "\tinitializing " + section.getName()
+					+ " section (" + section.getLength() + " pages)");
+
+			for (int i = 0; i < section.getLength(); i++) {
+				int vpn = section.getFirstVPN() + i;
+
+				/* 
+					// get availble physical page
+					int ppn = UserKernel.getPPN();
+					// if not return -1
+					if (ppn == -1) {
+						return false;
+					}
+				*/
+
+				// create translation entry from vpn to ppn
+				pageTable[vpn] = new TranslationEntry(vpn, -1, false, section.isReadOnly(), false, false);
+				
+				
+				//section.loadPage(i, ppn);
+				
+				
+				lastVpn = vpn;
+			}
+		}
+
+		for (int i = 0; i < 9; i++) {
+
+			//int ppn = UserKernel.getPPN();
+			int vpn = lastVpn + i + 1;
+
+			pageTable[vpn] = new TranslationEntry(vpn, -1, false, false, false, false);
+		}
+
+		// System.out.println("loaded sections");
+
+		return true;
+
+
 	}
 
 	/**
@@ -64,7 +115,7 @@ public class VMProcess extends UserProcess {
 
 		switch (cause) {
 		case Processor.exceptionPageFault:
-			int result2 = handlePageFault(processor.readRegister(Processor.regBadVaddr));
+			int result2 = handlePageFault(processor.readRegister(Processor.regBadVAddr));
 			processor.writeRegister(Processor.regV0, result2);
 			//do not advance PC so program attempts to read address again
 			break;
