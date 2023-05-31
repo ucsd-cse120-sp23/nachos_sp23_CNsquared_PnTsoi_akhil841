@@ -63,6 +63,11 @@ public class VMProcess extends UserProcess {
 		Processor processor = Machine.processor();
 
 		switch (cause) {
+		case Processor.exceptionPageFault:
+			int result2 = handlePageFault(processor.readRegister(Processor.regBadVaddr));
+			processor.writeRegister(Processor.regV0, result2);
+			//do not advance PC so program attempts to read address again
+			break;
 		default:
 			super.handleException(cause);
 			break;
