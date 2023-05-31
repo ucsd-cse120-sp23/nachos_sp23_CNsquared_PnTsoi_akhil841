@@ -128,6 +128,7 @@ public class VMProcess extends UserProcess {
 	int handlePageFault(int vaddr) {
 		int numSections = coff.getNumSections();
 		int processVPN = Processor.pageFromAddress(vaddr);
+		int lastVPN = 0;	
 		for(int i = 0; i < numSections; i++) {
 			CoffSection section = coff.getSection(i);
 			int vpn = section.getFirstVPN();
@@ -135,14 +136,22 @@ public class VMProcess extends UserProcess {
 			if(vpn + section.getLength() >= processVPN) {
 				continue;
 			}
+
+
 			int ppn = UserKernel.getPPN();
 			if (ppn == -1) {
 				return -1;
 			}
-			pageTable[vpn] = new TranslationEntry(vpn, ppn, true, section.isReadOnly(), false, false);
-			section.loadPage(vpn, ppn);
+			pageTable[vpn] = new TranslationEntry(vpn, ppn, true, section.isReadOnly(), true, false);
+			section.loadPage(processVPN - vpn, ppn);
+			
+
 			return 0;
 		}
+		int ppn = UserKernel.getPPN();
+		pageTable[processVPN] = new TranslationEntry(processVPN, ppn, true, false, true, false);
+		byte[] zeroArray = new byte[Processor.pageSize];
+		writeVirtualMemory(vaddr, zeroArray, 0, Processor.pageSize);
 		return -1;
 	}
 
