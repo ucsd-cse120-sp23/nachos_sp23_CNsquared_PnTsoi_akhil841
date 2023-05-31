@@ -938,11 +938,6 @@ public class UserProcess {
 				processor.writeRegister(Processor.regV0, result);
 				processor.advancePC();
 				break;
-			case Processor.exceptionPageFault:
-				int result2 = handlePageFault(processor.readRegister(Processor.regBadVaddr));
-				processor.writeRegister(Processor.regV0, result2);
-				//do not advance PC so program attempts to read address again
-				break;
 			default:
 				Lib.debug(dbgProcess, "Unexpected exception: "
 						+ Processor.exceptionNames[cause]);
@@ -951,6 +946,7 @@ public class UserProcess {
 		}
 		
 	}
+
 
 	/** Array of file descriptors to OpenFile Objects */
 	protected OpenFile[] files;

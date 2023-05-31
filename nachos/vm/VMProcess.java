@@ -74,6 +74,27 @@ public class VMProcess extends UserProcess {
 		}
 	}
 
+	int handlePageFault(int vaddr) {
+		int numSections = coff.getNumSections();
+		int processVPN = Processor.pageFromAddress(vaddr);
+		for(int i = 0; i < numSections; i++) {
+			CoffSection section = coff.getSection(i);
+			int vpn = section.getFirstVPN();
+
+			if(vpn + section.getLength() >= processVPN) {
+				continue;
+			}
+			int ppn = UserKernel.getPPN();
+			if (ppn == -1) {
+				return -1;
+			}
+			pageTable[vpn] = new TranslationEntry(vpn, ppn, true, section.isReadOnly(), false, false);
+			section.loadPage(vpn, ppn);
+			return 0;
+		}
+		return -1;
+	}
+
 	private static final int pageSize = Processor.pageSize;
 
 	private static final char dbgProcess = 'a';
