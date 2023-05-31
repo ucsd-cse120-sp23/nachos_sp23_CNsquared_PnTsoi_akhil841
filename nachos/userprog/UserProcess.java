@@ -402,12 +402,12 @@ public class UserProcess {
 				int vpn = section.getFirstVPN() + i;
 
 				 
-					// get availble physical page
-					int ppn = UserKernel.getPPN();
-					// if not return -1
-					if (ppn == -1) {
-						return false;
-					}
+				// get availble physical page
+				int ppn = UserKernel.getPPN();
+				// if not return -1
+				if (ppn == -1) {
+					return false;
+				}
 				
 
 				// create translation entry from vpn to ppn
