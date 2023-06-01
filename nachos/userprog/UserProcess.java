@@ -814,8 +814,11 @@ public class UserProcess {
 		child.thread.join();
 		// Machine.interrupt().enable();
 		Integer code = child.exitStatus;
-		byte[] mem = Lib.bytesFromInt( code);
-		writeVirtualMemory(ecAddr, mem, 0, 4);
+		if (code != null)
+		{
+			byte[] mem = Lib.bytesFromInt( code);
+			writeVirtualMemory(ecAddr, mem, 0, 4);
+		}
 		//remove child since it's finished. makes this function return -1 if 
 		//join is called on it again, unless we exec it under the same child process.
 		children.remove(childIdx);
