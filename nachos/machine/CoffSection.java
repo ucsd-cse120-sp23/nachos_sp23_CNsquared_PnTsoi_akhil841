@@ -174,7 +174,7 @@ public class CoffSection {
 	public void loadPage(int spn, int ppn) {
 		Lib.assertTrue(file != null);
 		System.out.println("Loading page " + spn + " into ppn " + ppn + " from file " + file.getName());
-
+		System.out.println("number of pages: " +numPages);
 		Lib.assertTrue(spn >= 0 && spn < numPages);
 		Lib.assertTrue(ppn >= 0 && ppn < Machine.processor().getNumPhysPages());
 
