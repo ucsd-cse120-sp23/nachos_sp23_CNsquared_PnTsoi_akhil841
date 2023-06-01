@@ -150,9 +150,9 @@ public class VMProcess extends UserProcess {
 			}
 			pageTable[processVPN] = new TranslationEntry(processVPN, ppn, true, section.isReadOnly(), true, false);
 			// prints out processvpn and vpn
-			System.out.println("processVPN: " + processVPN + " vpn: " + vpn);
+			// System.out.println("processVPN: " + processVPN + " vpn: " + vpn);
 			//prints out number of sections
-			System.out.println("numSections: " + numSections);
+			// System.out.println("numSections: " + numSections);
 			//prints out 
 			section.loadPage(processVPN - vpn, ppn);
 			
