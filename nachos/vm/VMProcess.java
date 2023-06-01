@@ -162,7 +162,7 @@ public class VMProcess extends UserProcess {
 		int ppn = UserKernel.getPPN();
 		pageTable[processVPN] = new TranslationEntry(processVPN, ppn, true, false, true, false);
 		byte[] zeroArray = new byte[Processor.pageSize];
-		writeVirtualMemory(vaddr, zeroArray, 0, Processor.pageSize);
+		System.arraycopy(zeroArray, 0, Machine.processor().getMemory(), ppn*pageSize, pageSize);
 		return -1;
 	}
 
