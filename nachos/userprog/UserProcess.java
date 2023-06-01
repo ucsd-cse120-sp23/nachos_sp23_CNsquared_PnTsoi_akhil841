@@ -711,7 +711,7 @@ public class UserProcess {
 
 	private int fileIndexNameLinearSearch(String name) {
 		for (int i = 2; i < 16; i++)
-			if (files[i].getName().equals(name))
+			if (files[i] != null && files[i].getName().equals(name))
 				return i;
 		return -1;
 	}

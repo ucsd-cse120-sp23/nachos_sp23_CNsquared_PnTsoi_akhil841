@@ -148,7 +148,7 @@ public class VMProcess extends UserProcess {
 			if (ppn == -1) {
 				return -1;
 			}
-			pageTable[vpn] = new TranslationEntry(vpn, ppn, true, section.isReadOnly(), true, false);
+			pageTable[processVPN] = new TranslationEntry(processVPN, ppn, true, section.isReadOnly(), true, false);
 			section.loadPage(processVPN - vpn, ppn);
 			
 
