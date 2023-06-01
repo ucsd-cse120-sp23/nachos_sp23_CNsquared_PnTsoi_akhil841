@@ -134,13 +134,12 @@ public class VMProcess extends UserProcess {
 
 	int handlePageFault(int vaddr) {
 		int numSections = coff.getNumSections();
-		int processVPN = Processor.pageFromAddress(vaddr);
-		int lastVPN = 0;	
+		int processVPN = Processor.pageFromAddress(vaddr);	
 		for(int i = 0; i < numSections; i++) {
 			CoffSection section = coff.getSection(i);
 			int vpn = section.getFirstVPN();
 
-			if(vpn + section.getLength() >= processVPN) {
+			if(processVPN < vpn || processVPN >= (vpn + numSections)) {
 				continue;
 			}
 
