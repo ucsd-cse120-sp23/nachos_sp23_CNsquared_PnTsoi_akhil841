@@ -1,5 +1,6 @@
 package nachos.vm;
 
+import nachos.machine.OpenFile;
 import nachos.userprog.*;
 import nachos.vm.*;
 
@@ -93,6 +94,6 @@ public class VMKernel extends UserKernel {
 
 	// dummy variables to make javac smarter
 	private static VMProcess dummy1 = null;
-
 	private static final char dbgVM = 'v';
+	private static OpenFile swapFile = fileSystem.open("swapFile", true);
 }

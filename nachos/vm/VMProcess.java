@@ -155,6 +155,8 @@ public class VMProcess extends UserProcess {
 		//if it got through the loop then it isnt a coff section and thus a stack/argument
 		int ppn = VMKernel.getPPN();
 		pageTable[processVPN] = new TranslationEntry(processVPN, ppn, true, false, true, false);
+
+		//either zero it out or load it from the swap file
 		byte[] zeroArray = new byte[Processor.pageSize];
 		System.arraycopy(zeroArray, 0, Machine.processor().getMemory(), ppn*pageSize, pageSize);
 		return -1;
