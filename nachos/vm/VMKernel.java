@@ -65,8 +65,15 @@ public class VMKernel extends UserKernel {
 		initLock.release();
 		//Machine.interrupt().enable();
 		return -1;
+	}
 
-		
+	public static int evictPPN(){
+
+
+
+
+
+		return -1;
 	}
 
 	public static int freePPN(int page){
