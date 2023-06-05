@@ -3,6 +3,9 @@ package nachos.vm;
 import java.util.LinkedList;
 import nachos.machine.Machine;
 import nachos.machine.OpenFile;
+import nachos.machine.Processor;
+import nachos.machine.StubFileSystem;
+import nachos.machine.TranslationEntry;
 import nachos.userprog.*;
 import nachos.vm.*;
 
@@ -97,6 +100,44 @@ public class VMKernel extends UserKernel {
 				idx = 0;
 		}
 		return idx;
+	}
+	//return 1 if successful
+	//return 0 if not
+	public static int writeEvictedToSwapFile(int evictedIPTIndex) {
+		//get evicted entry
+		TranslationEntry evictedEntry = ipt[evictedIPTIndex];
+		int evictedPPN = evictedEntry.ppn;
+		int physPageAddr = evictedPPN*Processor.pageSize;	
+		byte[] physPage = new byte[Processor.pageSize];
+		//read from physPage
+		StubFileSystem.read(physPageAddr, physPage, 0, Processor.pageSize);
+
+		if(evictedEntry.dirty) {
+			//not clean
+			//write to swap file
+			//get spn
+			int spn = SwapFile.getSPN();
+			if(spn == -1) {
+				//swap file full
+				// ummmm...
+				return 0;
+			}
+			else {
+				//write to swap file
+				int writeSize = SwapFile.write(spn*Processor.pageSize, physPage, 0, Processor.pageSize);
+				// update swapPageTable
+				swapPageTable[evictedEntry.ppn] = spn;
+				return 1;
+			}
+		}
+		else {
+			//clean 
+			//do nothing
+			//already evicted and nothing is changed on disk
+			swapPageTable[evictedEntry.ppn] = spn;
+			return 1;
+		}
+
 	}
 
 	public static int freePPN(int page){
