@@ -135,30 +135,35 @@ public class VMProcess extends UserProcess {
 	int handlePageFault(int vaddr) {
 		int numSections = coff.getNumSections();
 		int processVPN = Processor.pageFromAddress(vaddr);	
+
+		//check the coff sections for the vpn
 		for(int i = 0; i < numSections; i++) {
 			CoffSection section = coff.getSection(i);
-			int vpn = section.getFirstVPN();
-
-			if(processVPN < vpn || processVPN >= (vpn + section.getLength())) {
-				continue;
-			}
-
-
-			int ppn = UserKernel.getPPN();
-			if (ppn == -1) {
-				return -1;
-			}
-			pageTable[processVPN] = new TranslationEntry(processVPN, ppn, true, section.isReadOnly(), true, false);
-			// prints out processvpn and vpn
-			// System.out.println("processVPN: " + processVPN + " vpn: " + vpn);
-			//prints out number of sections
-			// System.out.println("numSections: " + numSections);
-			//prints out 
-			section.loadPage(processVPN - vpn, ppn);
+			int sectionVpn = section.getFirstVPN();
+			int sectionLength = section.getLength();
 			
 
-			return 0;
+			if( processVPN >= sectionVpn && processVPN < sectionVpn + sectionLength  ) {
+				
+				int ppn = UserKernel.getPPN();
+				if (ppn == -1) {
+					return -1;
+				}
+				pageTable[processVPN] = new TranslationEntry(processVPN, ppn, true, section.isReadOnly(), true, false);
+				// prints out processvpn and vpn
+				// System.out.println("processVPN: " + processVPN + " vpn: " + vpn);
+				//prints out number of sections
+				// System.out.println("numSections: " + numSections);
+				//prints out 
+				section.loadPage(processVPN - sectionVpn, ppn);
+			
+
+				return 0;
+			}
+			
 		}
+
+		//if it got through the loop then it isnt a coff section and thus a stack/argument
 		int ppn = UserKernel.getPPN();
 		pageTable[processVPN] = new TranslationEntry(processVPN, ppn, true, false, true, false);
 		byte[] zeroArray = new byte[Processor.pageSize];
