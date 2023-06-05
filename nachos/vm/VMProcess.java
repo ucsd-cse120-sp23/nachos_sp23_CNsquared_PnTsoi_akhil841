@@ -59,15 +59,6 @@ public class VMProcess extends UserProcess {
 			for (int i = 0; i < section.getLength(); i++) {
 				int vpn = section.getFirstVPN() + i;
 
-				/* 
-					// get availble physical page
-					int ppn = UserKernel.getPPN();
-					// if not return -1
-					if (ppn == -1) {
-						return false;
-					}
-				*/
-
 				// create translation entry from vpn to ppn
 				pageTable[vpn] = new TranslationEntry(vpn, -1, false, section.isReadOnly(), false, false);
 				
@@ -80,8 +71,6 @@ public class VMProcess extends UserProcess {
 		}
 
 		for (int i = 0; i < 9; i++) {
-
-			//int ppn = UserKernel.getPPN();
 			int vpn = lastVpn + i + 1;
 
 			pageTable[vpn] = new TranslationEntry(vpn, -1, false, false, false, false);
@@ -145,7 +134,7 @@ public class VMProcess extends UserProcess {
 
 			if( processVPN >= sectionVpn && processVPN < sectionVpn + sectionLength  ) {
 				
-				int ppn = UserKernel.getPPN();
+				int ppn = VMKernel.getPPN();
 				if (ppn == -1) {
 					return -1;
 				}
@@ -164,7 +153,7 @@ public class VMProcess extends UserProcess {
 		}
 
 		//if it got through the loop then it isnt a coff section and thus a stack/argument
-		int ppn = UserKernel.getPPN();
+		int ppn = VMKernel.getPPN();
 		pageTable[processVPN] = new TranslationEntry(processVPN, ppn, true, false, true, false);
 		byte[] zeroArray = new byte[Processor.pageSize];
 		System.arraycopy(zeroArray, 0, Machine.processor().getMemory(), ppn*pageSize, pageSize);
