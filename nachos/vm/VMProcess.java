@@ -229,7 +229,7 @@ public class VMProcess extends UserProcess {
 	}
 
 	private int getPaddr(int vaddr) {
-		;
+		
 
 		int paddr = -1;
 
@@ -243,11 +243,11 @@ public class VMProcess extends UserProcess {
 		//page fault
 		if (pageTable[vpn] == null || !pageTable[vpn].valid)
 			handlePageFault(vaddr);
-		// pageTable[vpn].used = true;
+		
 		int ppn = pageTable[vpn].ppn;
 
 		paddr = Processor.makeAddress(ppn, addrOffest);
-		// paddr = pageSize * ppn + addrOffest;
+		
 
 		return paddr;
 
