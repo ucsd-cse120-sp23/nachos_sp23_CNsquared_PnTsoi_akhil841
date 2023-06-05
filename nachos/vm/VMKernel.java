@@ -1,5 +1,9 @@
 package nachos.vm;
 
+import java.util.LinkedList;
+import java.util.concurrent.locks.Lock;
+
+import nachos.machine.Machine;
 import nachos.machine.OpenFile;
 import nachos.userprog.*;
 import nachos.vm.*;
@@ -21,6 +25,7 @@ public class VMKernel extends UserKernel {
  @Override
 	public void initialize(String[] args) {
 		super.initialize(args);
+
 	}
 
 	/**
@@ -92,8 +97,31 @@ public class VMKernel extends UserKernel {
 
 	}
 
+	//if there is free pages then 
+	public static int getSPN(){
+		if(physicalMemoryAvail.size() > 0){
+			return physicalMemoryAvail.pop();
+		}
+		return -1;
+	}
+
+	//add locks
+	public static int freeSPN(int page){
+		if(swapFileFreePages.contains(page)){
+			return -1;
+		}	
+		swapFileFreePages.add(page);
+		
+		return 0;
+
+	}
+
+
 	// dummy variables to make javac smarter
 	private static VMProcess dummy1 = null;
 	private static final char dbgVM = 'v';
 	private static OpenFile swapFile = fileSystem.open("swapFile", true);
+	private static LinkedList<Integer> swapFileFreePages = new LinkedList<>();
+	private static Integer[] swapPageTable = new Integer[Machine.processor().getNumPhysPages()];
+
 }
