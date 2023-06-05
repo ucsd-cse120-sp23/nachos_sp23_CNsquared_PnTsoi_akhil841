@@ -241,7 +241,10 @@ public class VMProcess extends UserProcess {
 		}
 
 		//page fault
-		if (pageTable[vpn] == null || !pageTable[vpn].valid)
+		if (pageTable[vpn] == null )
+			return -1;
+		
+		if(!pageTable[vpn].valid)
 			handlePageFault(vaddr);
 		
 		int ppn = pageTable[vpn].ppn;
@@ -305,12 +308,17 @@ public class VMProcess extends UserProcess {
 			return false;
 		}
 
-		//page fault
-		if (pageTable[vpn] == null)
+		
+		if (pageTable[vpn] == null){
 			return false;
-			 
-		if(!pageTable[vpn].valid)
+		}
+			
+
+		if(!pageTable[vpn].valid){
+			System.out.println("Im handling a page fault!");
 			handlePageFault(vaddr);
+		}
+			
 		
 		return !pageTable[vpn].readOnly;
 	}
