@@ -46,6 +46,44 @@ public class VMKernel extends UserKernel {
 		super.terminate();
 	}
 
+
+ 
+	public static int getPPN(){
+		
+		//Machine.interrupt().disable();
+		initLock.acquire();
+		if(physicalMemoryAvail == null){
+			initializeMemory();
+		}
+
+
+		if(physicalMemoryAvail.size() > 0){
+			initLock.release();
+			//Machine.interrupt().enable();
+			return physicalMemoryAvail.pop();
+		}
+		initLock.release();
+		//Machine.interrupt().enable();
+		return -1;
+
+		
+	}
+
+	public static int freePPN(int page){
+		initLock.acquire();
+		//Machine.interrupt().disable();
+		if(physicalMemoryAvail.contains(page)){
+			initLock.release();
+			//Machine.interrupt().enable();
+			return -1;
+		}
+		initLock.release();
+		physicalMemoryAvail.add(page);
+		//Machine.interrupt().enable();
+		return 0;
+
+	}
+
 	// dummy variables to make javac smarter
 	private static VMProcess dummy1 = null;
 
