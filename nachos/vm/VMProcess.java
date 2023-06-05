@@ -61,7 +61,7 @@ public class VMProcess extends UserProcess {
 
 				// create translation entry from vpn to ppn
 				pageTable[vpn] = new TranslationEntry(vpn, -1, false, section.isReadOnly(), false, false);
-				
+				pageTable[vpn].used = true;
 				
 				//section.loadPage(i, ppn);
 				
@@ -74,6 +74,7 @@ public class VMProcess extends UserProcess {
 			int vpn = lastVpn + i + 1;
 
 			pageTable[vpn] = new TranslationEntry(vpn, -1, false, false, false, false);
+			pageTable[vpn].used = true;
 		}
 
 		// System.out.println("loaded sections");
@@ -95,6 +96,7 @@ public class VMProcess extends UserProcess {
 				UserKernel.freePPN(entry.ppn);
 
 			pageTable[i] = null;
+			pageTable[i].used = false;
 		}
 	}
 
@@ -134,11 +136,14 @@ public class VMProcess extends UserProcess {
 
 			if( processVPN >= sectionVpn && processVPN < sectionVpn + sectionLength  ) {
 				
-				int ppn = VMKernel.getPPN();
+				
+				pageTable[processVPN] = new TranslationEntry(processVPN, 0, true, section.isReadOnly(), true, false);
+				int ppn = VMKernel.getPPN(pageTable[processVPN]);
 				if (ppn == -1) {
 					return -1;
 				}
-				pageTable[processVPN] = new TranslationEntry(processVPN, ppn, true, section.isReadOnly(), true, false);
+				//pageTable[processVPN].ppn = ppn;
+				pageTable[processVPN].used = true;
 				// prints out processvpn and vpn
 				// System.out.println("processVPN: " + processVPN + " vpn: " + vpn);
 				//prints out number of sections
@@ -153,10 +158,10 @@ public class VMProcess extends UserProcess {
 		}
 
 		//if it got through the loop then it isnt a coff section and thus a stack/argument
-		int ppn = VMKernel.getPPN();
-		pageTable[processVPN] = new TranslationEntry(processVPN, ppn, true, false, true, false);
-
-		//either zero it out or load it from the swap file
+		pageTable[processVPN] = new TranslationEntry(processVPN, 0, true, false, true, false);
+		pageTable[processVPN].used = true;
+		int ppn = VMKernel.getPPN(pageTable[processVPN]);
+		//pageTable[processVPN].ppn = ppn;
 		byte[] zeroArray = new byte[Processor.pageSize];
 		System.arraycopy(zeroArray, 0, Machine.processor().getMemory(), ppn*pageSize, pageSize);
 		return -1;

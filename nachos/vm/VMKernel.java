@@ -1,12 +1,11 @@
 package nachos.vm;
 
 import java.util.LinkedList;
-import java.util.concurrent.locks.Lock;
-
 import nachos.machine.Machine;
 import nachos.machine.OpenFile;
 import nachos.userprog.*;
 import nachos.vm.*;
+
 
 /**
  * A kernel that can support multiple demand-paging user processes.
@@ -54,7 +53,7 @@ public class VMKernel extends UserKernel {
 
 
  
-	public static int getPPN(){
+	public static int getPPN(TranslationEntry te){
 		
 		//Machine.interrupt().disable();
 		initLock.acquire();
@@ -66,7 +65,11 @@ public class VMKernel extends UserKernel {
 		if(physicalMemoryAvail.size() > 0){
 			initLock.release();
 			//Machine.interrupt().enable();
-			return physicalMemoryAvail.pop();
+			int out = physicalMemoryAvail.pop();
+			te.ppn = out;
+			ipt[out] = te;
+			//used.put(out, true);
+			return out;
 		}
 		initLock.release();
 		//Machine.interrupt().enable();
@@ -74,12 +77,26 @@ public class VMKernel extends UserKernel {
 	}
 
 	public static int evictPPN(){
-
-
-
-
-
 		return -1;
+	}
+
+	//get idx of first free page
+	public static int clockPPN() {
+		if (physicalMemoryAvail.size() > 0)
+			return -1;
+		int idx = 0;
+		while (idx < ipt.length) 
+		{
+			//set to false
+			if (!ipt[idx].used)
+				break;
+			ipt[idx].used = false;
+			//increment circular-ly
+			idx++;
+			if (idx == ipt.length)
+				idx = 0;
+		}
+		return idx;
 	}
 
 	public static int freePPN(int page){
@@ -87,6 +104,7 @@ public class VMKernel extends UserKernel {
 		//Machine.interrupt().disable();
 		if(physicalMemoryAvail.contains(page)){
 			initLock.release();
+			ipt[page] = null;
 			//Machine.interrupt().enable();
 			return -1;
 		}
@@ -124,4 +142,6 @@ public class VMKernel extends UserKernel {
 	private static LinkedList<Integer> swapFileFreePages = new LinkedList<>();
 	private static Integer[] swapPageTable = new Integer[Machine.processor().getNumPhysPages()];
 
+
+	private static TranslationEntry[] ipt = new TranslationEntry[Machine.processor().getNumPhysPages()];	
 }
