@@ -110,7 +110,6 @@ public class VMProcess extends UserProcess {
 
 		switch (cause) {
 		case Processor.exceptionPageFault:
-			System.out.println("Caught page fault - entering handlePageFault");
 			int result2 = handlePageFault(processor.readRegister(Processor.regBadVAddr));
 			// processor.writeRegister(Processor.regV0, result2);
 			//do not advance PC so program attempts to read address again
@@ -259,8 +258,11 @@ public class VMProcess extends UserProcess {
 		if (pageTable[vpn] == null )
 			return -1;
 		
-		if(!pageTable[vpn].valid)
+		if(!pageTable[vpn].valid){
+
+			System.out.println("Handling page fault in get padddr because vaddr is not valid");
 			handlePageFault(vaddr);
+		}
 		
 		int ppn = pageTable[vpn].ppn;
 		pageTable[vpn].used = true;
@@ -331,7 +333,7 @@ public class VMProcess extends UserProcess {
 			
 
 		if(!pageTable[vpn].valid){
-			System.out.println("Im handling a page fault!");
+			System.out.println("Handle Page Fault because vaddr is not valid in valid write");
 			handlePageFault(vaddr);
 		}
 			
