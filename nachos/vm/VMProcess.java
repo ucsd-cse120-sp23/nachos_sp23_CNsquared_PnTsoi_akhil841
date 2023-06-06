@@ -173,7 +173,7 @@ public class VMProcess extends UserProcess {
 				section.loadPage(processVPN - sectionVpn, ppn);
 
 				System.out.println("Loaded coff section: " + section);
-				System.out.println("From vpn: " + processVPN);
+				System.out.println("From vpn: " + processVPN + " From vaddr: " + vaddr);
 				System.out.println("Into physical memory: " + ppn);
 				System.out.println("Loaded memory from coff section");
 			
