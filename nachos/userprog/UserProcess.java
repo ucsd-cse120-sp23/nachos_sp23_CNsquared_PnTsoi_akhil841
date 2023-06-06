@@ -386,7 +386,6 @@ public class UserProcess {
 		int lastVpn = 0;
 
 		if (numPages > Machine.processor().getNumPhysPages()) {
-			System.out.println("insufficient physical memory");
 			coff.close();
 			Lib.debug(dbgProcess, "\tinsufficient physical memory");
 			return false;
