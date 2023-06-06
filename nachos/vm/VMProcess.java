@@ -94,9 +94,8 @@ public class VMProcess extends UserProcess {
 			TranslationEntry entry = pageTable[i];
 			if (entry != null && entry.valid == true)
 				UserKernel.freePPN(entry.ppn);
-
+			//pageTable[i].used = false;
 			pageTable[i] = null;
-			pageTable[i].used = false;
 		}
 	}
 
