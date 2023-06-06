@@ -244,6 +244,7 @@ public class VMProcess extends UserProcess {
 			handlePageFault(vaddr);
 		
 		int ppn = pageTable[vpn].ppn;
+		pageTable[vpn].used = true;
 
 		paddr = Processor.makeAddress(ppn, addrOffest);
 		

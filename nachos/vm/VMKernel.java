@@ -4,7 +4,6 @@ import java.util.LinkedList;
 import nachos.machine.Machine;
 import nachos.machine.OpenFile;
 import nachos.machine.Processor;
-import nachos.machine.StubFileSystem;
 import nachos.machine.TranslationEntry;
 import nachos.userprog.*;
 import nachos.vm.*;
@@ -87,19 +86,24 @@ public class VMKernel extends UserKernel {
 	public static int clockPPN() {
 		if (physicalMemoryAvail.size() > 0)
 			return -1;
-		int idx = 0;
-		while (idx < ipt.length) 
+		int eidx = 0;
+		int delta = Machine.processor().getNumPhysPages() >> 2;
+		int cidx = eidx + delta;
+		while (eidx < ipt.length) 
 		{
 			//set to false
-			if (!ipt[idx].used)
+			if (!ipt[eidx].used)
 				break;
-			ipt[idx].used = false;
+			ipt[cidx].used = false;
 			//increment circular-ly
-			idx++;
-			if (idx == ipt.length)
-				idx = 0;
+			eidx++;
+			cidx++;
+			if (eidx == ipt.length)
+				eidx = 0;
+			if (cidx == ipt.length)
+				cidx = 0;
 		}
-		return idx;
+		return eidx;
 	}
 	//return 1 if successful
 	//return 0 if not
