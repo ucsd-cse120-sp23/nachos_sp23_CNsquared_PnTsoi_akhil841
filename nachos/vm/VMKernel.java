@@ -74,7 +74,7 @@ public class VMKernel extends UserKernel {
 			//used.put(out, true);
 			return out;
 		}
-		System.out.println("YO WHATS GOOD HOMIES");
+		
 		int freePPNIdx = clockPPN();
 		writeEvictedToSwapFile(freePPNIdx);
 		initLock.release();
@@ -130,14 +130,16 @@ public class VMKernel extends UserKernel {
 			if(spn == -1) {
 				int writeSize = swapFile.write(  swapFile.length()    , physPage, 0, Processor.pageSize);
 				// update swapPageTable
-				swapPageTable[evictedEntry.ppn] = (swapFile.length() / Processor.pageSize )-1;
+				//swapPageTable[evictedEntry.ppn] = (swapFile.length() / Processor.pageSize )-1;
+				evictedEntry.vpn = (swapFile.length() / Processor.pageSize )-1;
 				return 1;
 			}
 			else {
 				//write to swap file
 				int writeSize = swapFile.write(spn*Processor.pageSize, physPage, 0, Processor.pageSize);
 				// update swapPageTable
-				swapPageTable[evictedEntry.ppn] = spn;
+				//swapPageTable[evictedEntry.ppn] = spn;
+				evictedEntry.vpn = spn;
 				return 1;
 			}
 		}
@@ -193,8 +195,6 @@ public class VMKernel extends UserKernel {
 	private static final char dbgVM = 'v';
 	public static OpenFile swapFile;
 	private static LinkedList<Integer> swapFileFreePages = new LinkedList<>();
-	public static Integer[] swapPageTable = new Integer[Machine.processor().getNumPhysPages()];
-
 
 	private static TranslationEntry[] ipt = new TranslationEntry[Machine.processor().getNumPhysPages()];	
 }
