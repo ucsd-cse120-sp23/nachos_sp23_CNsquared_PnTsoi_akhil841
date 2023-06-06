@@ -112,11 +112,12 @@ public class VMKernel extends UserKernel {
 		TranslationEntry evictedEntry = ipt[evictedIPTIndex];
 		int evictedPPN = evictedEntry.ppn;
 		int physPageAddr = evictedPPN*Processor.pageSize;	
-		byte[] physPage = new byte[Processor.pageSize];
-		int spn = getSPN();
 		//read from physPage
-
+		byte[] physPage = new byte[Processor.pageSize];
+		System.arraycopy(Machine.processor().getMemory(), physPageAddr*Processor.pageSize,
+		 physPage, 0, Processor.pageSize);
 		int spn = getSPN();
+
 		if(evictedEntry.dirty) {
 			//not clean
 			//write to swap file
