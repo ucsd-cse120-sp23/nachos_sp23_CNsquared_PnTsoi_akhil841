@@ -74,9 +74,11 @@ public class VMKernel extends UserKernel {
 			//used.put(out, true);
 			return out;
 		}
+		int freePPNIdx = clockPPN();
+		writeEvictedToSwapFile(freePPNIdx);
 		initLock.release();
 		//Machine.interrupt().enable();
-		return -1;
+		return freePPNIdx;
 	}
 
 	public static int evictPPN(){
