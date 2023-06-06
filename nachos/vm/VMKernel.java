@@ -163,8 +163,8 @@ public class VMKernel extends UserKernel {
 
 	//if there is free pages then 
 	public static int getSPN(){
-		if(physicalMemoryAvail.size() > 0){
-			return physicalMemoryAvail.pop();
+		if(swapFileFreePages.size() > 0){
+			return swapFileFreePages.pop();
 		}
 		return -1;
 	}
