@@ -108,15 +108,13 @@ public class VMKernel extends UserKernel {
 		TranslationEntry evictedEntry = ipt[evictedIPTIndex];
 		int evictedPPN = evictedEntry.ppn;
 		int physPageAddr = evictedPPN*Processor.pageSize;	
-		byte[] physPage = new byte[Processor.pageSize];
 		//read from physPage
-		StubFileSystem.read(physPageAddr, physPage, 0, Processor.pageSize);
 
+		int spn = getSPN();
 		if(evictedEntry.dirty) {
 			//not clean
 			//write to swap file
 			//get spn
-			int spn = SwapFile.getSPN();
 			if(spn == -1) {
 				//swap file full
 				// ummmm...
@@ -124,7 +122,7 @@ public class VMKernel extends UserKernel {
 			}
 			else {
 				//write to swap file
-				int writeSize = SwapFile.write(spn*Processor.pageSize, physPage, 0, Processor.pageSize);
+				int writeSize = swapFile.write(spn*Processor.pageSize, physPageAddr, 0, Processor.pageSize);
 				// update swapPageTable
 				swapPageTable[evictedEntry.ppn] = spn;
 				return 1;
