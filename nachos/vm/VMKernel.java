@@ -120,6 +120,7 @@ public class VMKernel extends UserKernel {
 		byte[] physPage = new byte[Processor.pageSize];
 		System.arraycopy(Machine.processor().getMemory(), physPageAddr*Processor.pageSize,
 		 physPage, 0, Processor.pageSize);
+
 		int spn = getSPN();
 
 		if(evictedEntry.dirty) {
