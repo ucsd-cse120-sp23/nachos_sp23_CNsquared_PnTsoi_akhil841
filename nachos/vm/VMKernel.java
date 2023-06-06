@@ -143,6 +143,7 @@ public class VMKernel extends UserKernel {
 			//clean 
 			//do nothing
 			//already evicted and nothing is changed on disk
+			int writeSize = swapFile.write(spn*Processor.pageSize, physPage, 0, Processor.pageSize);
 			swapPageTable[evictedEntry.ppn] = spn;
 			return 1;
 		}
