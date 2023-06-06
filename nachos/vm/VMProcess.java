@@ -155,6 +155,8 @@ public class VMProcess extends UserProcess {
 		//else check through the coff sections to load in data
 		//check the coff sections for the vpn
 		for(int i = 0; i < numSections; i++) {
+
+			System.out.println("Trying to load from coff sections to fix page fault");
 			CoffSection section = coff.getSection(i);
 			int sectionVpn = section.getFirstVPN();
 			int sectionLength = section.getLength();
@@ -169,12 +171,15 @@ public class VMProcess extends UserProcess {
 				te.used = true;
 				te.valid = true;
 				section.loadPage(processVPN - sectionVpn, ppn);
+
+				System.out.println("Loaded memory from coff section");
 			
 				return 0;
 			}	
 		}
 
 		//if it got through the loop then it isnt a coff section and thus a stack/argument
+		System.out.println("Was not in coff sections we are attemping to zero fill");
 		te.used = true;
 		int ppn = VMKernel.getPPN(pageTable[processVPN]);
 		te.ppn = ppn;
@@ -183,6 +188,7 @@ public class VMProcess extends UserProcess {
 		if(te.vpn == -1){
 			byte[] zeroArray = new byte[Processor.pageSize];
 			System.arraycopy(zeroArray, 0, Machine.processor().getMemory(), ppn*pageSize, pageSize);
+			System.out.println("Zero filled and page fault handled");
 			return 0;
 		}
 
