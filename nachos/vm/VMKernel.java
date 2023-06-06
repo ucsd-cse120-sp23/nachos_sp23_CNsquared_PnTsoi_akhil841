@@ -57,6 +57,7 @@ public class VMKernel extends UserKernel {
 
  
 	public static int getPPN(TranslationEntry te){
+		System.out.println("trying to get PPN");
 		
 		//Machine.interrupt().disable();
 		initLock.acquire();
@@ -74,7 +75,7 @@ public class VMKernel extends UserKernel {
 			//used.put(out, true);
 			return out;
 		}
-		System.out.println("YO WHATS GOOD HOMIES");
+		System.out.println("nofree memory");
 		int freePPNIdx = clockPPN();
 		writeEvictedToSwapFile(freePPNIdx);
 		initLock.release();
