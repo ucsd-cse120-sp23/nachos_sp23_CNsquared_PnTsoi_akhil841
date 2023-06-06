@@ -112,6 +112,7 @@ public class VMProcess extends UserProcess {
 
 		switch (cause) {
 		case Processor.exceptionPageFault:
+			System.out.println("Caught page fault - entering handlePageFault");
 			int result2 = handlePageFault(processor.readRegister(Processor.regBadVAddr));
 			// processor.writeRegister(Processor.regV0, result2);
 			//do not advance PC so program attempts to read address again

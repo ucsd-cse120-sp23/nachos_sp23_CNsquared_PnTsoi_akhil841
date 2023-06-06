@@ -128,9 +128,10 @@ public class VMKernel extends UserKernel {
 			//write to swap file
 			//get spn
 			if(spn == -1) {
-				//swap file full
-				// ummmm...
-				return 0;
+				int writeSize = swapFile.write(  swapFile.length()    , physPage, 0, Processor.pageSize);
+				// update swapPageTable
+				swapPageTable[evictedEntry.ppn] = (swapFile.length() / Processor.pageSize )-1;
+				return 1;
 			}
 			else {
 				//write to swap file
