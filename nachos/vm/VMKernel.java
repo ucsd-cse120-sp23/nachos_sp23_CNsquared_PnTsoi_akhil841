@@ -118,7 +118,7 @@ public class VMKernel extends UserKernel {
 		int physPageAddr = evictedPPN*Processor.pageSize;	
 		//read from physPage
 		byte[] physPage = new byte[Processor.pageSize];
-		System.arraycopy(Machine.processor().getMemory(), physPageAddr*Processor.pageSize,
+		System.arraycopy(Machine.processor().getMemory(), physPageAddr,
 		 physPage, 0, Processor.pageSize);
 
 		int spn = getSPN();
