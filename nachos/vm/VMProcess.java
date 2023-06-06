@@ -43,12 +43,6 @@ public class VMProcess extends UserProcess {
 		// System.out.println("attempting loading sections");
 		int lastVpn = 0;
 
-		if (numPages > Machine.processor().getNumPhysPages()) {
-			coff.close();
-			Lib.debug(dbgProcess, "\tinsufficient physical memory");
-			return false;
-		}
-
 		// load sections
 		for (int s = 0; s < coff.getNumSections(); s++) {
 			CoffSection section = coff.getSection(s);
