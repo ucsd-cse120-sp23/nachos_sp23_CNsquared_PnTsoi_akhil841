@@ -3,6 +3,7 @@ package nachos.vm;
 import java.util.LinkedList;
 import nachos.machine.Machine;
 import nachos.machine.OpenFile;
+import nachos.machine.TranslationEntry;
 import nachos.userprog.*;
 import nachos.vm.*;
 
