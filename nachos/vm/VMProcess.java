@@ -12,6 +12,7 @@ public class VMProcess extends UserProcess {
 	 */
 	public VMProcess() {
 		super();
+		
 	}
 
 	/**
@@ -41,6 +42,7 @@ public class VMProcess extends UserProcess {
  @Override
 	protected boolean loadSections() {
 		// System.out.println("attempting loading sections");
+		pageTable = new TranslationEntry[numPages];
 		int lastVpn = 0;
 
 		// load sections
@@ -171,8 +173,6 @@ public class VMProcess extends UserProcess {
 			//write from buffer to ppn
 			System.arraycopy(buffer, 0, Machine.processor().getMemory(), ppn*pageSize, pageSize);
 			VMKernel.freeSPN(spn);
-
-
 		}
 
 		
@@ -339,4 +339,7 @@ public class VMProcess extends UserProcess {
 	private static final char dbgProcess = 'a';
 
 	private static final char dbgVM = 'v';
+
+	/** This process's page table. */
+	protected TranslationEntry[] pageTable;
 }
