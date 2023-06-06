@@ -26,6 +26,7 @@ public class VMKernel extends UserKernel {
  @Override
 	public void initialize(String[] args) {
 		super.initialize(args);
+		swapFile = fileSystem.open("swapFile", true);
 
 	}
 
@@ -186,7 +187,7 @@ public class VMKernel extends UserKernel {
 	// dummy variables to make javac smarter
 	private static VMProcess dummy1 = null;
 	private static final char dbgVM = 'v';
-	public static OpenFile swapFile = fileSystem.open("swapFile", true);
+	public static OpenFile swapFile;
 	private static LinkedList<Integer> swapFileFreePages = new LinkedList<>();
 	public static Integer[] swapPageTable = new Integer[Machine.processor().getNumPhysPages()];
 
