@@ -132,6 +132,8 @@ public class VMProcess extends UserProcess {
 		int spn = te.vpn;
 		if(spn != -1){
 
+			System.out.println("Doing a swap to handle page fault");
+
 			te.used = true;
 			te.valid = true;
 			int ppn = te.ppn;
@@ -165,6 +167,7 @@ public class VMProcess extends UserProcess {
 				}
 				te.ppn = ppn;
 				te.used = true;
+				te.valid = true;
 				section.loadPage(processVPN - sectionVpn, ppn);
 			
 				return 0;
@@ -175,6 +178,7 @@ public class VMProcess extends UserProcess {
 		te.used = true;
 		int ppn = VMKernel.getPPN(pageTable[processVPN]);
 		te.ppn = ppn;
+		te.valid = true;
 
 		if(te.vpn == -1){
 			byte[] zeroArray = new byte[Processor.pageSize];
