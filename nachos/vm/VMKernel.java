@@ -109,6 +109,7 @@ public class VMKernel extends UserKernel {
 		int evictedPPN = evictedEntry.ppn;
 		int physPageAddr = evictedPPN*Processor.pageSize;	
 		byte[] physPage = new byte[Processor.pageSize];
+		int spn = getSPN();
 		//read from physPage
 		StubFileSystem.read(physPageAddr, physPage, 0, Processor.pageSize);
 
@@ -116,7 +117,6 @@ public class VMKernel extends UserKernel {
 			//not clean
 			//write to swap file
 			//get spn
-			int spn = SwapFile.getSPN();
 			if(spn == -1) {
 				//swap file full
 				// ummmm...
@@ -124,7 +124,7 @@ public class VMKernel extends UserKernel {
 			}
 			else {
 				//write to swap file
-				int writeSize = SwapFile.write(spn*Processor.pageSize, physPage, 0, Processor.pageSize);
+				int writeSize = swapFile.write(spn*Processor.pageSize, physPage, 0, Processor.pageSize);
 				// update swapPageTable
 				swapPageTable[evictedEntry.ppn] = spn;
 				return 1;
@@ -175,13 +175,15 @@ public class VMKernel extends UserKernel {
 
 	}
 
+	
+
 
 	// dummy variables to make javac smarter
 	private static VMProcess dummy1 = null;
 	private static final char dbgVM = 'v';
-	private static OpenFile swapFile = fileSystem.open("swapFile", true);
+	public static OpenFile swapFile = fileSystem.open("swapFile", true);
 	private static LinkedList<Integer> swapFileFreePages = new LinkedList<>();
-	private static Integer[] swapPageTable = new Integer[Machine.processor().getNumPhysPages()];
+	public static Integer[] swapPageTable = new Integer[Machine.processor().getNumPhysPages()];
 
 
 	private static TranslationEntry[] ipt = new TranslationEntry[Machine.processor().getNumPhysPages()];	

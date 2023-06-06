@@ -162,8 +162,28 @@ public class VMProcess extends UserProcess {
 		pageTable[processVPN].used = true;
 		int ppn = VMKernel.getPPN(pageTable[processVPN]);
 		//pageTable[processVPN].ppn = ppn;
-		byte[] zeroArray = new byte[Processor.pageSize];
-		System.arraycopy(zeroArray, 0, Machine.processor().getMemory(), ppn*pageSize, pageSize);
+
+		if(VMKernel.swapPageTable[ppn] == null){
+			byte[] zeroArray = new byte[Processor.pageSize];
+			System.arraycopy(zeroArray, 0, Machine.processor().getMemory(), ppn*pageSize, pageSize);
+		}
+		else{
+			int spn = VMKernel.swapPageTable[ppn];
+
+			//read from swap file to buffer
+			byte[] buffer = new byte[Processor.pageSize];
+			VMKernel.swapFile.read(buffer, spn * Processor.pageSize, Processor.pageSize);
+
+			//write from buffer to ppn
+			System.arraycopy(buffer, 0, Machine.processor().getMemory(), ppn*pageSize, pageSize);
+			VMKernel.freeSPN(spn);
+
+
+		}
+
+		
+
+
 		return -1;
 	}
 
