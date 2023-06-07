@@ -82,6 +82,10 @@ public class VMKernel extends UserKernel {
 		return freePPNIdx;
 	}
 
+	public static void pinPage(int paddr, boolean status) {
+		pinArray[paddr] = status;
+	}
+
 	public static int evictPPN(){
 		return -1;
 	}
@@ -96,9 +100,10 @@ public class VMKernel extends UserKernel {
 		while (eidx < ipt.length) 
 		{
 			//set to false
-			if (!ipt[eidx].used)
+			if (!ipt[eidx].used && !pinArray[eidx])
 				break;
-			ipt[cidx].used = false;
+			if (!pinArray[cidx])
+				ipt[cidx].used = false;
 			//increment circular-ly
 			eidx++;
 			cidx++;
@@ -196,5 +201,6 @@ public class VMKernel extends UserKernel {
 	public static Integer[] swapPageTable = new Integer[Machine.processor().getNumPhysPages()];
 
 
-	private static TranslationEntry[] ipt = new TranslationEntry[Machine.processor().getNumPhysPages()];	
+	private static TranslationEntry[] ipt = new TranslationEntry[Machine.processor().getNumPhysPages()];
+	private static boolean[] pinArray = new boolean[Machine.processor().getNumPhysPages()];	
 }
