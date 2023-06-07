@@ -12,6 +12,7 @@ public class VMProcess extends UserProcess {
 	 */
 	public VMProcess() {
 		super();
+		
 	}
 
 	/**
@@ -41,6 +42,7 @@ public class VMProcess extends UserProcess {
  @Override
 	protected boolean loadSections() {
 		// System.out.println("attempting loading sections");
+		pageTable = new TranslationEntry[numPages + 9];
 		int lastVpn = 0;
 
 		// load sections
@@ -54,7 +56,8 @@ public class VMProcess extends UserProcess {
 				int vpn = section.getFirstVPN() + i;
 
 				// create translation entry from vpn to ppn
-				pageTable[vpn] = new TranslationEntry(vpn, -1, false, section.isReadOnly(), false, false);
+				//VPN STORES SPN
+				pageTable[vpn] = new TranslationEntry(-1, -1, false, section.isReadOnly(), false, false);
 				pageTable[vpn].used = true;
 				
 				//section.loadPage(i, ppn);
@@ -67,7 +70,8 @@ public class VMProcess extends UserProcess {
 		for (int i = 0; i < 9; i++) {
 			int vpn = lastVpn + i + 1;
 
-			pageTable[vpn] = new TranslationEntry(vpn, -1, false, false, false, false);
+			//VPN STORES SPN
+			pageTable[vpn] = new TranslationEntry(-1, -1, false, false, false, false);
 			pageTable[vpn].used = true;
 		}
 
@@ -106,7 +110,6 @@ public class VMProcess extends UserProcess {
 
 		switch (cause) {
 		case Processor.exceptionPageFault:
-			System.out.println("Caught page fault - entering handlePageFault");
 			int result2 = handlePageFault(processor.readRegister(Processor.regBadVAddr));
 			// processor.writeRegister(Processor.regV0, result2);
 			//do not advance PC so program attempts to read address again
@@ -117,52 +120,23 @@ public class VMProcess extends UserProcess {
 		}
 	}
 
+	//they should already have a translation entry
 	int handlePageFault(int vaddr) {
+		//DO WE HAVE TO CHECK FOR INVALID VADDR?
+
 		int numSections = coff.getNumSections();
 		int processVPN = Processor.pageFromAddress(vaddr);	
+		TranslationEntry te = pageTable[processVPN];
 
-		//check the coff sections for the vpn
-		for(int i = 0; i < numSections; i++) {
-			CoffSection section = coff.getSection(i);
-			int sectionVpn = section.getFirstVPN();
-			int sectionLength = section.getLength();
-			
+		//if entry in the swap files exisits swap it in
+		int spn = te.vpn;
+		if(spn != -1){
 
-			if( processVPN >= sectionVpn && processVPN < sectionVpn + sectionLength  ) {
-				
-				
-				pageTable[processVPN] = new TranslationEntry(processVPN, 0, true, section.isReadOnly(), true, false);
-				int ppn = VMKernel.getPPN(pageTable[processVPN]);
-				if (ppn == -1) {
-					return -1;
-				}
-				//pageTable[processVPN].ppn = ppn;
-				pageTable[processVPN].used = true;
-				// prints out processvpn and vpn
-				// System.out.println("processVPN: " + processVPN + " vpn: " + vpn);
-				//prints out number of sections
-				// System.out.println("numSections: " + numSections);
-				//prints out 
-				section.loadPage(processVPN - sectionVpn, ppn);
-			
+			System.out.println("Doing a swap to handle page fault");
 
-				return 0;
-			}
-			
-		}
-
-		//if it got through the loop then it isnt a coff section and thus a stack/argument
-		pageTable[processVPN] = new TranslationEntry(processVPN, 0, true, false, true, false);
-		pageTable[processVPN].used = true;
-		int ppn = VMKernel.getPPN(pageTable[processVPN]);
-		//pageTable[processVPN].ppn = ppn;
-
-		if(VMKernel.swapPageTable[ppn] == null){
-			byte[] zeroArray = new byte[Processor.pageSize];
-			System.arraycopy(zeroArray, 0, Machine.processor().getMemory(), ppn*pageSize, pageSize);
-		}
-		else{
-			int spn = VMKernel.swapPageTable[ppn];
+			te.used = true;
+			te.valid = true;
+			int ppn = te.ppn;
 
 			//read from swap file to buffer
 			byte[] buffer = new byte[Processor.pageSize];
@@ -170,13 +144,56 @@ public class VMProcess extends UserProcess {
 
 			//write from buffer to ppn
 			System.arraycopy(buffer, 0, Machine.processor().getMemory(), ppn*pageSize, pageSize);
+			te.vpn = -1;
 			VMKernel.freeSPN(spn);
-
+			return 0;
 
 		}
 
-		
+		//when spn is -1 that means it hasnt been swapped out before so we have to get data from coff section or zero fill it
 
+		//else check through the coff sections to load in data
+		//check the coff sections for the vpn
+		for(int i = 0; i < numSections; i++) {
+
+			System.out.println("Trying to load from coff sections to fix page fault");
+			CoffSection section = coff.getSection(i);
+			int sectionVpn = section.getFirstVPN();
+			int sectionLength = section.getLength();
+			
+			//found the section it is in
+			if( processVPN >= sectionVpn && processVPN < sectionVpn + sectionLength  ) {
+				int ppn = VMKernel.getPPN(te);
+				if (ppn == -1) {
+					return -1;
+				}
+				te.ppn = ppn;
+				te.used = true;
+				te.valid = true;
+				section.loadPage(processVPN - sectionVpn, ppn);
+
+				System.out.println("Loaded coff section: " + section);
+				System.out.println("From vpn: " + processVPN + " From vaddr: " + vaddr);
+				System.out.println("Into physical memory: " + ppn);
+				System.out.println("Loaded memory from coff section");
+			
+				return 0;
+			}	
+		}
+
+		//if it got through the loop then it isnt a coff section and thus a stack/argument
+		System.out.println("Was not in coff sections we are attemping to zero fill");
+		te.used = true;
+		int ppn = VMKernel.getPPN(pageTable[processVPN]);
+		te.ppn = ppn;
+		te.valid = true;
+
+		if(te.vpn == -1){
+			byte[] zeroArray = new byte[Processor.pageSize];
+			System.arraycopy(zeroArray, 0, Machine.processor().getMemory(), ppn*pageSize, pageSize);
+			System.out.println("Zero filled and page fault handled");
+			return 0;
+		}
 
 		return -1;
 	}
@@ -281,8 +298,11 @@ public class VMProcess extends UserProcess {
 		if (pageTable[vpn] == null )
 			return -1;
 		
-		if(!pageTable[vpn].valid)
+		if(!pageTable[vpn].valid){
+
+			System.out.println("Handling page fault in get padddr because vaddr is not valid");
 			handlePageFault(vaddr);
+		}
 		
 		int ppn = pageTable[vpn].ppn;
 		pageTable[vpn].used = true;
@@ -379,7 +399,7 @@ public class VMProcess extends UserProcess {
 			
 
 		if(!pageTable[vpn].valid){
-			System.out.println("Im handling a page fault!");
+			System.out.println("Handle Page Fault because vaddr is not valid in valid write");
 			handlePageFault(vaddr);
 		}
 			
@@ -392,4 +412,7 @@ public class VMProcess extends UserProcess {
 	private static final char dbgProcess = 'a';
 
 	private static final char dbgVM = 'v';
+
+	/** This process's page table. */
+	protected TranslationEntry[] pageTable;
 }
