@@ -170,6 +170,9 @@ public class VMProcess extends UserProcess {
 			
 			//found the section it is in
 			if( processVPN >= sectionVpn && processVPN < sectionVpn + sectionLength  ) {
+				System.out.println("process vpn: " + processVPN);
+				System.out.println("section starting von: " + sectionVpn);
+				System.out.println("section Length: " + sectionLength);
 				int ppn = VMKernel.getPPN(te);
 				if (ppn == -1) {
 					return -1;
@@ -178,7 +181,7 @@ public class VMProcess extends UserProcess {
 				te.used = true;
 				te.valid = true;
 
-				section.loadPage(processVPN, ppn);
+				section.loadPage(processVPN - sectionVpn, ppn);
 
 				System.out.println("Loaded coff section: " + section);
 				System.out.println("From vpn: " + processVPN + " From vaddr: " + vaddr);
