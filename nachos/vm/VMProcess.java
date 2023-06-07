@@ -121,10 +121,13 @@ public class VMProcess extends UserProcess {
 	//they should already have a translation entry
 	int handlePageFault(int vaddr) {
 		//DO WE HAVE TO CHECK FOR INVALID VADDR?
+		
 
 		int numSections = coff.getNumSections();
 		int processVPN = Processor.pageFromAddress(vaddr);	
 		TranslationEntry te = pageTable[processVPN];
+
+		System.out.println("TE VALID " + te.valid);
 
 		//if entry in the swap files exisits swap it in
 		int spn = te.vpn;
@@ -168,6 +171,7 @@ public class VMProcess extends UserProcess {
 				te.ppn = ppn;
 				te.used = true;
 				te.valid = true;
+
 				section.loadPage(processVPN, ppn);
 
 				System.out.println("Loaded coff section: " + section);
