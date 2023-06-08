@@ -136,26 +136,26 @@ public class VMProcess extends UserProcess {
 		System.out.println("TE VALID " + te.valid);
 
 		//if entry in the swap files exisits swap it in
-		int spn = te.vpn;
-		if(spn != -1){
+		// int spn = te.vpn;
+		// if(spn != -1){
 
-			System.out.println("Doing a swap to handle page fault");
+		// 	System.out.println("Doing a swap to handle page fault");
 
-			te.used = true;
-			te.valid = true;
-			int ppn = te.ppn;
+		// 	te.used = true;
+		// 	te.valid = true;
+		// 	int ppn = te.ppn;
 
-			//read from swap file to buffer
-			byte[] buffer = new byte[Processor.pageSize];
-			VMKernel.swapFile.read(buffer, spn * Processor.pageSize, Processor.pageSize);
+		// 	//read from swap file to buffer
+		// 	byte[] buffer = new byte[Processor.pageSize];
+		// 	VMKernel.swapFile.read(buffer, spn * Processor.pageSize, Processor.pageSize);
 
-			//write from buffer to ppn
-			System.arraycopy(buffer, 0, Machine.processor().getMemory(), ppn*pageSize, pageSize);
-			te.vpn = -1;
-			VMKernel.freeSPN(spn);
-			return 0;
+		// 	//write from buffer to ppn
+		// 	System.arraycopy(buffer, 0, Machine.processor().getMemory(), ppn*pageSize, pageSize);
+		// 	te.vpn = -1;
+		// 	VMKernel.freeSPN(spn);
+		// 	return 0;
 
-		}
+		// }
 
 		//when spn is -1 that means it hasnt been swapped out before so we have to get data from coff section or zero fill it
 
