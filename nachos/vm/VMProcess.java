@@ -182,6 +182,11 @@ public class VMProcess extends UserProcess {
 				te.valid = true;
 				te.readOnly = section.isReadOnly();
 				System.out.println("Page table entry: " + te);
+				System.out.println("Page table ppn " + te.ppn);
+				System.out.println("Page table vpn " + te.vpn);
+				System.out.println("Page table used " + te.used);
+				System.out.println("Page table valid " + te.valid);
+				System.out.println("Page table readOnly " + te.isReadOnly());
 				System.out.println("Loaded coff section: " + section);
 				System.out.println("From vpn: " + processVPN + " From vaddr: " + vaddr);
 				System.out.println("Into physical memory: " + ppn);
