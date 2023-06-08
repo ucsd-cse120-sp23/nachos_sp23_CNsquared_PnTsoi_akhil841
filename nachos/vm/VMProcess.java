@@ -46,7 +46,7 @@ public class VMProcess extends UserProcess {
 		int lastVpn = 0;
 
 		for(int i = 0; i < numPages; i++){
-			pageTable[i] = new TranslationEntry(i, -1, false, false, false, false);
+			pageTable[i] = new TranslationEntry(-1, -1, false, false, false, false);
 		}
 		/* 
 
@@ -180,6 +180,7 @@ public class VMProcess extends UserProcess {
 				te.ppn = ppn;
 				te.used = true;
 				te.valid = true;
+				te.vpn = processVPN;
 				te.readOnly = section.isReadOnly();
 				System.out.println("Page table entry: " + te);
 				System.out.println("Page table ppn " + te.ppn);
