@@ -46,7 +46,7 @@ public class VMProcess extends UserProcess {
 		int lastVpn = 0;
 
 		for(int i = 0; i < numPages; i++){
-			pageTable[i] = new TranslationEntry(-1, -1, false, false, false, false);
+			pageTable[i] = new TranslationEntry(i, -1, false, false, false, false);
 		}
 		/* 
 
