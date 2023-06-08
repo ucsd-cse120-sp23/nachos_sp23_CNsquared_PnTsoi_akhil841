@@ -178,7 +178,7 @@ public class VMProcess extends UserProcess {
 				te.used = true;
 				te.valid = true;
 
-				section.loadPage(processVPN, ppn);
+				section.loadPage(processVPN - sectionVpn, ppn);
 
 				System.out.println("Loaded coff section: " + section);
 				System.out.println("From vpn: " + processVPN + " From vaddr: " + vaddr);
