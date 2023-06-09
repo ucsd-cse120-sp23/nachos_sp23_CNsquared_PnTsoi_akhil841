@@ -126,6 +126,25 @@ public class VMProcess extends UserProcess {
 		te.used = true;
 		te.valid = true;
 
+		//if entry in the swap files exisits swap it in
+		int spn = te.vpn;
+		if(spn != -1){
+			System.out.println("Doing a swap to handle page fault");
+
+			//read from swap file to buffer
+			byte[] buffer = new byte[Processor.pageSize];
+			VMKernel.swapFile.read(buffer, spn * Processor.pageSize, Processor.pageSize);
+
+			//write from buffer to ppn
+			System.arraycopy(buffer, 0, Machine.processor().getMemory(), ppn*pageSize, pageSize);
+			
+			//Free the SPN
+			te.vpn = -1;
+			VMKernel.freeSPN(spn);
+			return 0;
+
+		}
+
 		//check the coff sections for the vpn
 		int numSections = coff.getNumSections();
 		for(int i = 0; i < numSections; i++) {
@@ -133,13 +152,10 @@ public class VMProcess extends UserProcess {
 			int sectionVpn = section.getFirstVPN();
 			int sectionLength = section.getLength();
 			
-			if( processVPN >= sectionVpn && processVPN < sectionVpn + sectionLength  ) {
-				
-				//pageTable[processVPN] = new TranslationEntry(-1, -1, true, section.isReadOnly(), true, false);
+			if( processVPN >= sectionVpn && processVPN < sectionVpn + sectionLength ) {
 				section.loadPage(processVPN - sectionVpn, ppn);
 				return 0;
 			}
-			
 		}
 
 
