@@ -135,7 +135,7 @@ public class VMProcess extends UserProcess {
 			
 			if( processVPN >= sectionVpn && processVPN < sectionVpn + sectionLength  ) {
 				
-				pageTable[processVPN] = new TranslationEntry(-1, -1, true, section.isReadOnly(), true, false);
+				//pageTable[processVPN] = new TranslationEntry(-1, -1, true, section.isReadOnly(), true, false);
 				section.loadPage(processVPN - sectionVpn, ppn);
 				return 0;
 			}
