@@ -59,22 +59,9 @@ public class VMProcess extends UserProcess {
 			for (int i = 0; i < section.getLength(); i++) {
 				int vpn = section.getFirstVPN() + i;
 
-				/* 
-					// get availble physical page
-					int ppn = UserKernel.getPPN();
-					// if not return -1
-					if (ppn == -1) {
-						return false;
-					}
-				*/
-
 				// create translation entry from vpn to ppn
+				//VPN stores SPN //THIS WORKS 
 				pageTable[vpn] = new TranslationEntry(-1, -1, false, section.isReadOnly(), false, false);
-				
-				
-				//section.loadPage(i, ppn);
-				
-				
 				lastVpn = vpn;
 			}
 		}
@@ -121,6 +108,7 @@ public class VMProcess extends UserProcess {
 
 		switch (cause) {
 		case Processor.exceptionPageFault:
+			System.out.println("Page Fault called by nachos");
 			int result2 = handlePageFault(processor.readRegister(Processor.regBadVAddr));
 			// processor.writeRegister(Processor.regV0, result2);
 			//do not advance PC so program attempts to read address again
@@ -239,6 +227,7 @@ public class VMProcess extends UserProcess {
 			return -1;
 		
 		if(!pageTable[vpn].valid)
+			System.out.println("Page fault called by get paddr");
 			handlePageFault(vaddr);
 		
 		int ppn = pageTable[vpn].ppn;
@@ -309,7 +298,7 @@ public class VMProcess extends UserProcess {
 			
 
 		if(!pageTable[vpn].valid){
-			System.out.println("Im handling a page fault!");
+			System.out.println("Page fault called by valid write");
 			handlePageFault(vaddr);
 		}
 			
