@@ -185,7 +185,6 @@ public class UserProcess {
 	}
 
 	private int getPaddr(int vaddr) {
-		;
 
 		int paddr = -1;
 

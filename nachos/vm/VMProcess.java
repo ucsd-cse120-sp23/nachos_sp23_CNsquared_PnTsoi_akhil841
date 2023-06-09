@@ -177,7 +177,6 @@ public class VMProcess extends UserProcess {
 
 		int vpn = Processor.pageFromAddress(vaddr);
 		int addrOffest = Processor.offsetFromAddress(vaddr);
-
 		if (vpn >= pageTable.length || vpn < 0) {
 			return -1;
 		}
@@ -221,10 +220,6 @@ public class VMProcess extends UserProcess {
 
 		int amountWritten = 0;
 		int paddr;
-		
-		int vaddrCopy = vaddr;
-		int paddrCopy;
-		int delta = 0;
 
 		// loop for reading memory page by page
 
@@ -233,6 +228,8 @@ public class VMProcess extends UserProcess {
 
 			// get the physical address from virtual adresss
 			paddr = this.getPaddr(vaddr);
+			if (paddr == -1)
+				return -1;
 			VMKernel.pinPage(paddr, true);
 			/*if (paddr < 0 || paddr >= memory.length || !validWrite(vaddr)) {
 				return amountWritten;
@@ -357,8 +354,10 @@ public class VMProcess extends UserProcess {
 		while (amountCopied < length) {
 
 			// get the physical address from virtual adresss
-
+			
 			paddr = this.getPaddr(vaddr);
+			if (paddr == -1)
+				return -1;
 			System.out.println(paddr);
 			VMKernel.pinPage(paddr, true);
 			/*if (paddr < 0 || paddr >= memory.length) {
