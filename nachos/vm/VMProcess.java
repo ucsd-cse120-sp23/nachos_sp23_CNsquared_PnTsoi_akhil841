@@ -41,6 +41,7 @@ public class VMProcess extends UserProcess {
  @Override
 	protected boolean loadSections() {
 		// System.out.println("attempting loading sections");
+		pageTable = new TranslationEntry[numPages];
 		int lastVpn = 0;
 
 		// load sections
