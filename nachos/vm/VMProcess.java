@@ -156,15 +156,24 @@ public class VMProcess extends UserProcess {
 			CoffSection section = coff.getSection(i);
 			int sectionVpn = section.getFirstVPN();
 			int sectionLength = section.getLength();
-			
+
+			for (int j = 0; j < section.getLength(); j++) {
+				int vpn = section.getFirstVPN() + j;
+				if(vpn == processVPN){
+					section.loadPage(j, ppn);
+					return 0;
+				}
+				
+			}
+			/* 
 			if( processVPN >= sectionVpn && processVPN < sectionVpn + sectionLength ) {
 				System.out.println("Loading the coff section to fix page fault");
 				System.out.println("loading section: " + section + " into ppn: " + ppn);
 				section.loadPage(processVPN - sectionVpn, ppn);
 				return 0;
 			}
+			*/
 		}
-
 
 		//if it got through the loop then it isnt a coff section and thus a stack/argument and doesnt have anything stored in swap page	
 		System.out.println("Zero filling to fix page fault");
