@@ -130,7 +130,7 @@ public class VMProcess extends UserProcess {
 		//if entry in the swap files exisits swap it in
 		int spn = te.vpn;
 		if(spn != -1){
-			//System.out.println("Doing a swap to handle page fault");
+			System.out.println("Doing a swap to handle page fault");
 
 			//read from swap file to buffer
 			byte[] buffer = new byte[Processor.pageSize];
@@ -156,6 +156,7 @@ public class VMProcess extends UserProcess {
 			int sectionLength = section.getLength();
 			
 			if( processVPN >= sectionVpn && processVPN < sectionVpn + sectionLength ) {
+				System.out.println("Loading the coff section to fix page fault");
 				section.loadPage(processVPN - sectionVpn, ppn);
 				return 0;
 			}
@@ -163,6 +164,7 @@ public class VMProcess extends UserProcess {
 
 
 		//if it got through the loop then it isnt a coff section and thus a stack/argument and doesnt have anything stored in swap page	
+		System.out.println("Zero filling to fix page fault");
 		byte[] zeroArray = new byte[Processor.pageSize];
 		System.arraycopy(zeroArray, 0, Machine.processor().getMemory(), ppn*pageSize, pageSize);
 		return -1;
@@ -191,7 +193,7 @@ public class VMProcess extends UserProcess {
 		}
 		
 		int ppn = pageTable[vpn].ppn;
-		System.out.println("Page recieved is: " + ppn);
+		//System.out.println("Page recieved is: " + ppn);
 		paddr = Processor.makeAddress(ppn, addrOffest);
 
 		return paddr;
