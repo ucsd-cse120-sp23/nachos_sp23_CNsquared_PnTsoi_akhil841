@@ -87,7 +87,8 @@ public class VMKernel extends UserKernel {
 	}
 
 	public static void pinPage(int paddr, boolean status) {
-		pinArray[paddr] = status;
+		int ppn = paddr / Processor.pageSize;
+		pinArray[ppn] = status;
 	}
 
 	//get idx of first free page
