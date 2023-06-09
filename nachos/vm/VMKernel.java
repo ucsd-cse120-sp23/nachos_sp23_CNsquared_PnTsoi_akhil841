@@ -73,11 +73,12 @@ public class VMKernel extends UserKernel {
 		}
 		
 		System.out.println("Using clock algo");
-		int freePPNIdx = clockPPN();
-		writeEvictedToSwapFile(freePPNIdx);
+		int evictIdx = clockPPN();
+		System.out.println("Used clock algo and want to evict ipt: " + evictIdx);
+		int freePPN = writeEvictedToSwapFile(evictIdx);
 		initLock.release();
 		
-		return freePPNIdx;
+		return freePPN;
 	}
 
 	public static void pinPage(int paddr, boolean status) {
@@ -116,6 +117,8 @@ public class VMKernel extends UserKernel {
 		evictedEntry.valid = false;
 		
 		int evictedPPN = evictedEntry.ppn;
+		evictedEntry.ppn = -1;
+
 		int physPageAddr = evictedPPN*Processor.pageSize;	
 
 		//read from physPage
@@ -130,20 +133,20 @@ public class VMKernel extends UserKernel {
 			if(spn == -1) {
 				int writeSize = swapFile.write( swapFile.length(), physPage, 0, Processor.pageSize);
 				evictedEntry.vpn = (swapFile.length() / Processor.pageSize )-1;
-				return 1;
+				return evictedPPN;
 			}
 			else {
 				//write to swap file
 				int writeSize = swapFile.write(spn*Processor.pageSize, physPage, 0, Processor.pageSize);
 				evictedEntry.vpn = spn;
-				return 1;
+				return evictedPPN;
 			}
 		}
 		else {
 			//clean 
 			//do nothing
 			//not dirty i.e. never written to
-			return 1;
+			return evictedPPN;
 		}
 
 	}
