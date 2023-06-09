@@ -82,8 +82,12 @@ public class VMProcess extends UserProcess {
 		// go through pagetable and free all of the physical pages
 		for (int i = 0; i < pageTable.length; i++) {
 			TranslationEntry entry = pageTable[i];
-			if (entry != null && entry.valid == true)
+			if (entry != null && entry.valid == true){
 				VMKernel.freePPN(entry.ppn);
+			}
+			if(entry != null){
+				VMKernel.freeSPN(entry.vpn);
+			}
 
 			pageTable[i] = null;
 		}
@@ -135,9 +139,11 @@ public class VMProcess extends UserProcess {
 			//write from buffer to ppn
 			System.arraycopy(buffer, 0, Machine.processor().getMemory(), ppn*pageSize, pageSize);
 			
-			//Free the SPN //DO WE DO THIS?????
+			//Free the SPN //DO WE DO THIS????? //I DONT THINK WE DO THIS
+			/* 
 			te.vpn = -1;
 			VMKernel.freeSPN(spn);
+			*/
 			return 0;
 
 		}
