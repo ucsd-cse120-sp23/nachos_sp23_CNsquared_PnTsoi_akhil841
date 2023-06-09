@@ -117,13 +117,13 @@ public class VMProcess extends UserProcess {
 	}
 
 	int handlePageFault(int vaddr) {
+
+		System.out.println("Handling a page fault");
 		
 		int processVPN = Processor.pageFromAddress(vaddr);
 		TranslationEntry te = pageTable[processVPN];
 		
 		int ppn = VMKernel.getPPN(te);
-		//System.out.println("Ended up with ppn: " + ppn);
-		//System.out.println("TE got ppn: " + te.ppn);
 		te.used = true;
 		te.valid = true;
 
@@ -131,6 +131,7 @@ public class VMProcess extends UserProcess {
 		int spn = te.vpn;
 		if(spn != -1){
 			System.out.println("Doing a swap to handle page fault");
+			System.out.println("swapping spn: " + spn + " into ppn: " + ppn);
 
 			//read from swap file to buffer
 			byte[] buffer = new byte[Processor.pageSize];
@@ -138,6 +139,7 @@ public class VMProcess extends UserProcess {
 
 			//write from buffer to ppn
 			System.arraycopy(buffer, 0, Machine.processor().getMemory(), ppn*pageSize, pageSize);
+
 			
 			//Free the SPN //DO WE DO THIS????? //I DONT THINK WE DO THIS
 			/* 
@@ -157,6 +159,7 @@ public class VMProcess extends UserProcess {
 			
 			if( processVPN >= sectionVpn && processVPN < sectionVpn + sectionLength ) {
 				System.out.println("Loading the coff section to fix page fault");
+				System.out.println("loading section: " + section + " into ppn: " + ppn);
 				section.loadPage(processVPN - sectionVpn, ppn);
 				return 0;
 			}
