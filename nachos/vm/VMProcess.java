@@ -118,9 +118,10 @@ public class VMProcess extends UserProcess {
 
 	int handlePageFault(int vaddr) {
 
-		System.out.println("Handling a page fault");
+		
 		
 		int processVPN = Processor.pageFromAddress(vaddr);
+		System.out.println("Handling a page fault on vpn: " + processVPN);
 		TranslationEntry te = pageTable[processVPN];
 		
 		int ppn = VMKernel.getPPN(te);
