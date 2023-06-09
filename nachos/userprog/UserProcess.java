@@ -342,6 +342,8 @@ public class UserProcess {
 		// program counter initially points at the program entry point
 		initialPC = coff.getEntryPoint();
 
+		System.out.println("I need " + " many pages for COff sections code");
+
 		// next comes the stack; stack pointer initially points to top of it
 		numPages += stackPages;
 		initialSP = numPages * pageSize;
