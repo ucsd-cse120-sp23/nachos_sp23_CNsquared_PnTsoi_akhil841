@@ -102,7 +102,7 @@ public class VMProcess extends UserProcess {
 
 		switch (cause) {
 		case Processor.exceptionPageFault:
-			System.out.println("Page Fault called by nachos");
+			//System.out.println("Page Fault called by nachos");
 			int result2 = handlePageFault(processor.readRegister(Processor.regBadVAddr));
 			//do not advance PC so program attempts to read address again
 			break;
@@ -118,15 +118,15 @@ public class VMProcess extends UserProcess {
 		TranslationEntry te = pageTable[processVPN];
 		
 		int ppn = VMKernel.getPPN(te);
-		System.out.println("Ended up with ppn: " + ppn);
-		System.out.println("TE got ppn: " + te.ppn);
+		//System.out.println("Ended up with ppn: " + ppn);
+		//System.out.println("TE got ppn: " + te.ppn);
 		te.used = true;
 		te.valid = true;
 
 		//if entry in the swap files exisits swap it in
 		int spn = te.vpn;
 		if(spn != -1){
-			System.out.println("Doing a swap to handle page fault");
+			//System.out.println("Doing a swap to handle page fault");
 
 			//read from swap file to buffer
 			byte[] buffer = new byte[Processor.pageSize];
@@ -180,7 +180,7 @@ public class VMProcess extends UserProcess {
 		
 		//page fault
 		if(!pageTable[vpn].valid || pageTable[vpn].ppn == -1){
-			System.out.println("Page fault called by get paddr");
+			//System.out.println("Page fault called by get paddr");
 			handlePageFault(vaddr);
 		}
 		
@@ -293,7 +293,7 @@ public class VMProcess extends UserProcess {
 			
 
 		if(!pageTable[vpn].valid){
-			System.out.println("Page fault called by valid write");
+			//System.out.println("Page fault called by valid write");
 			handlePageFault(vaddr);
 		}
 			
