@@ -206,24 +206,50 @@ public class VMProcess extends UserProcess {
  @Override
 	public int writeVirtualMemory(int vaddr, byte[] data, int offset, int length) {
 		Lib.assertTrue(offset >= 0 && length >= 0
-				&& offset + length <= data.length);
+					&& offset + length <= data.length);
 
 		byte[] memory = Machine.processor().getMemory();
 
 		int amountWritten = 0;
 		int paddr;
+		
+		int vaddrCopy = vaddr;
+		int paddrCopy;
+		int delta = 0;
 
-		// System.out.println("writeVirtualMemory starts");
+		//pin all pages
+		while (delta < length) {
+			paddrCopy = this.getPaddr(vaddrCopy);
+			//prematurely free all pages if they cannot be used
+			if (paddrCopy < 0 || paddrCopy >= memory.length || !validWrite(vaddrCopy)) {
+				int delta2 = 0;
+				int paddrCopy2;
+				int vaddrCopy2 = vaddr;
+				while (delta2 < delta) {
+					paddrCopy2 = this.getPaddr(vaddrCopy2);
+					int amount = Math.min(length - delta2, pageSize - Processor.offsetFromAddress(vaddrCopy2));
+					VMKernel.pinPage(paddrCopy2, false);
+					delta2 += amount;
+					vaddrCopy2 += amount;
+				}
+				return 0;
+			}
+			int amount = Math.min(length - delta, pageSize - Processor.offsetFromAddress(vaddrCopy));
+			VMKernel.pinPage(paddrCopy, true);
+			delta += amount;
+			vaddrCopy += amount;
+		}
 
 		// loop for reading memory page by page
+
 		while (amountWritten < length) {
 			// System.out.println("length: " + length);
 
 			// get the physical address from virtual adresss
 			paddr = this.getPaddr(vaddr);
-			if (paddr < 0 || paddr >= memory.length || !validWrite(vaddr)) {
+			/*if (paddr < 0 || paddr >= memory.length || !validWrite(vaddr)) {
 				return amountWritten;
-			}
+			}*/
 
 			// the amount that we write to this page is either the entire page( starting at
 			// the paddr) or the remainder of what we are supposed to write
@@ -232,12 +258,7 @@ public class VMProcess extends UserProcess {
 
 			// writes it to the data
 			System.arraycopy(data, offset + amountWritten, memory, paddr, amount);
-
-			///////////
-			TranslationEntry te = pageTable[Processor.pageFromAddress(vaddr)];
-			te.dirty = true;
-			//////////
-
+			VMKernel.pinPage(paddr, false);
 			amountWritten += amount;
 			// offsets the virtual address
 			vaddr += amount;
@@ -245,6 +266,47 @@ public class VMProcess extends UserProcess {
 
 		}
 		return amountWritten;
+
+		// Lib.assertTrue(offset >= 0 && length >= 0
+		// 		&& offset + length <= data.length);
+
+		// byte[] memory = Machine.processor().getMemory();
+
+		// int amountWritten = 0;
+		// int paddr;
+
+		// // System.out.println("writeVirtualMemory starts");
+
+		// // loop for reading memory page by page
+		// while (amountWritten < length) {
+		// 	// System.out.println("length: " + length);
+
+		// 	// get the physical address from virtual adresss
+		// 	paddr = this.getPaddr(vaddr);
+		// 	if (paddr < 0 || paddr >= memory.length || !validWrite(vaddr)) {
+		// 		return amountWritten;
+		// 	}
+
+		// 	// the amount that we write to this page is either the entire page( starting at
+		// 	// the paddr) or the remainder of what we are supposed to write
+		// 	int amount = Math.min(length - amountWritten, pageSize - Processor.offsetFromAddress(vaddr));
+		// 	// System.out.println("amount: " + amount);
+
+		// 	// writes it to the data
+		// 	System.arraycopy(data, offset + amountWritten, memory, paddr, amount);
+
+		// 	///////////
+		// 	TranslationEntry te = pageTable[Processor.pageFromAddress(vaddr)];
+		// 	te.dirty = true;
+		// 	//////////
+
+		// 	amountWritten += amount;
+		// 	// offsets the virtual address
+		// 	vaddr += amount;
+		// 	// System.out.println("vaddr: " + vaddr);
+
+		// }
+		// return amountWritten;
 	}
 
 	private boolean validWrite(int vaddr) {
@@ -296,8 +358,34 @@ public class VMProcess extends UserProcess {
 
 		byte[] memory = Machine.processor().getMemory();
 
+		int vaddrCopy = vaddr;
+		int paddrCopy;
 		int paddr;
 		int amountCopied = 0;
+		int delta = 0;
+
+		//pin all pages
+		while (delta < length) {
+			paddrCopy = this.getPaddr(vaddrCopy);
+			//prematurely free pages if they cannot be used
+			if (paddrCopy < 0 || paddrCopy >= memory.length) {
+				int delta2 = 0;
+				int paddrCopy2;
+				int vaddrCopy2 = vaddr;
+				while (delta2 < delta) {
+					paddrCopy2 = this.getPaddr(vaddrCopy2);
+					int amount = Math.min(length - delta2, pageSize - Processor.offsetFromAddress(vaddrCopy2));
+					VMKernel.pinPage(paddrCopy2, false);
+					delta2 += amount;
+					vaddrCopy2 += amount;
+				}
+				return -1;
+			}
+			int amount = Math.min(length - delta, pageSize - Processor.offsetFromAddress(vaddrCopy));
+			VMKernel.pinPage(paddrCopy, true);
+			delta += amount;
+			vaddrCopy += amount;
+		}
 
 		// loop for reading memory page by page
 
@@ -306,15 +394,16 @@ public class VMProcess extends UserProcess {
 			// get the physical address from virtual adresss
 
 			paddr = this.getPaddr(vaddr);
-			if (paddr < 0 || paddr >= memory.length) {
+			/*if (paddr < 0 || paddr >= memory.length) {
 				return -1;
-			}
+			}*/
 
 			// the amount that we read from this page is either the entire page( starting at
 			// the paddr) or the remainder of what we are supposed to copy
 			int amount = Math.min(length - amountCopied, pageSize - Processor.offsetFromAddress(vaddr));
 			// writes it to the data
 			System.arraycopy(memory, paddr, data, offset + amountCopied, amount);
+			VMKernel.pinPage(paddr, false);
 			amountCopied += amount;
 			// offsets the virtual address
 			vaddr += amount;
@@ -322,5 +411,36 @@ public class VMProcess extends UserProcess {
 		}
 
 		return amountCopied;
+		// Lib.assertTrue(offset >= 0 && length >= 0
+		// 		&& offset + length <= data.length);
+
+		// byte[] memory = Machine.processor().getMemory();
+
+		// int paddr;
+		// int amountCopied = 0;
+
+		// // loop for reading memory page by page
+
+		// while (amountCopied < length) {
+
+		// 	// get the physical address from virtual adresss
+
+		// 	paddr = this.getPaddr(vaddr);
+		// 	if (paddr < 0 || paddr >= memory.length) {
+		// 		return -1;
+		// 	}
+
+		// 	// the amount that we read from this page is either the entire page( starting at
+		// 	// the paddr) or the remainder of what we are supposed to copy
+		// 	int amount = Math.min(length - amountCopied, pageSize - Processor.offsetFromAddress(vaddr));
+		// 	// writes it to the data
+		// 	System.arraycopy(memory, paddr, data, offset + amountCopied, amount);
+		// 	amountCopied += amount;
+		// 	// offsets the virtual address
+		// 	vaddr += amount;
+
+		// }
+
+		// return amountCopied;
 	}
 }
