@@ -226,29 +226,6 @@ public class VMProcess extends UserProcess {
 		int paddrCopy;
 		int delta = 0;
 
-		//pin all pages
-		while (delta < length) {
-			paddrCopy = this.getPaddr(vaddrCopy);
-			//prematurely free all pages if they cannot be used
-			if (paddrCopy < 0 || paddrCopy >= memory.length || !validWrite(vaddrCopy)) {
-				int delta2 = 0;
-				int paddrCopy2;
-				int vaddrCopy2 = vaddr;
-				while (delta2 < delta) {
-					paddrCopy2 = this.getPaddr(vaddrCopy2);
-					int amount = Math.min(length - delta2, pageSize - Processor.offsetFromAddress(vaddrCopy2));
-					VMKernel.pinPage(paddrCopy2, false);
-					delta2 += amount;
-					vaddrCopy2 += amount;
-				}
-				return 0;
-			}
-			int amount = Math.min(length - delta, pageSize - Processor.offsetFromAddress(vaddrCopy));
-			VMKernel.pinPage(paddrCopy, true);
-			delta += amount;
-			vaddrCopy += amount;
-		}
-
 		// loop for reading memory page by page
 
 		while (amountWritten < length) {
@@ -256,6 +233,7 @@ public class VMProcess extends UserProcess {
 
 			// get the physical address from virtual adresss
 			paddr = this.getPaddr(vaddr);
+			VMKernel.pinPage(paddr, true);
 			/*if (paddr < 0 || paddr >= memory.length || !validWrite(vaddr)) {
 				return amountWritten;
 			}*/
@@ -371,34 +349,8 @@ public class VMProcess extends UserProcess {
 
 		byte[] memory = Machine.processor().getMemory();
 
-		int vaddrCopy = vaddr;
-		int paddrCopy;
 		int paddr;
 		int amountCopied = 0;
-		int delta = 0;
-
-		//pin all pages
-		while (delta < length) {
-			paddrCopy = this.getPaddr(vaddrCopy);
-			//prematurely free pages if they cannot be used
-			if (paddrCopy < 0 || paddrCopy >= memory.length) {
-				int delta2 = 0;
-				int paddrCopy2;
-				int vaddrCopy2 = vaddr;
-				while (delta2 < delta) {
-					paddrCopy2 = this.getPaddr(vaddrCopy2);
-					int amount = Math.min(length - delta2, pageSize - Processor.offsetFromAddress(vaddrCopy2));
-					VMKernel.pinPage(paddrCopy2, false);
-					delta2 += amount;
-					vaddrCopy2 += amount;
-				}
-				return -1;
-			}
-			int amount = Math.min(length - delta, pageSize - Processor.offsetFromAddress(vaddrCopy));
-			VMKernel.pinPage(paddrCopy, true);
-			delta += amount;
-			vaddrCopy += amount;
-		}
 
 		// loop for reading memory page by page
 
@@ -407,6 +359,8 @@ public class VMProcess extends UserProcess {
 			// get the physical address from virtual adresss
 
 			paddr = this.getPaddr(vaddr);
+			System.out.println(paddr);
+			VMKernel.pinPage(paddr, true);
 			/*if (paddr < 0 || paddr >= memory.length) {
 				return -1;
 			}*/
