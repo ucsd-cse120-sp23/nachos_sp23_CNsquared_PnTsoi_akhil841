@@ -577,8 +577,8 @@ public class UserProcess {
 
 		// create new process
 
-		VMProcess child = (VMProcess) VMProcess.newUserProcess();
-		child.execute(programName, args);
+		UserProcess child = UserProcess.newUserProcess();
+		System.out.println("if excuted properly: " + child.execute(programName, args));
 		children.add(child);
 		child.parent = this;
 		// System.out.println("child thread created and readied");
@@ -982,7 +982,7 @@ public class UserProcess {
 
 	private static final char dbgProcess = 'a';
 
-	protected UserProcess parent = null;
+	private UserProcess parent = null;
 
 	private ArrayList<UserProcess> children = new ArrayList<>();
 
@@ -992,7 +992,7 @@ public class UserProcess {
 
 	public static int freeProcessID = 1;
 
-	protected Integer exitStatus = 0;
+	private Integer exitStatus = 0;
 
 	private Lock rwLock = new Lock();
 }
