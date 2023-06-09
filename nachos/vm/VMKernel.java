@@ -76,6 +76,7 @@ public class VMKernel extends UserKernel {
 		int evictIdx = clockPPN();
 		System.out.println("Used clock algo and want to evict ipt: " + evictIdx);
 		int freePPN = writeEvictedToSwapFile(evictIdx);
+		System.out.println("Freed ppn: " + freePPN);
 		initLock.release();
 		
 		return freePPN;
