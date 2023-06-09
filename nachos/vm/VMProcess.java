@@ -69,7 +69,7 @@ public class VMProcess extends UserProcess {
 				*/
 
 				// create translation entry from vpn to ppn
-				pageTable[vpn] = new TranslationEntry(vpn, -1, false, section.isReadOnly(), false, false);
+				pageTable[vpn] = new TranslationEntry(-1, -1, false, section.isReadOnly(), false, false);
 				
 				
 				//section.loadPage(i, ppn);
@@ -83,8 +83,7 @@ public class VMProcess extends UserProcess {
 
 			//int ppn = UserKernel.getPPN();
 			int vpn = lastVpn + i + 1;
-
-			pageTable[vpn] = new TranslationEntry(vpn, -1, false, false, false, false);
+			pageTable[vpn] = new TranslationEntry(-1, -1, false, false, false, false);
 		}
 
 		// System.out.println("loaded sections");
@@ -150,11 +149,6 @@ public class VMProcess extends UserProcess {
 					return -1;
 				}
 				pageTable[processVPN] = new TranslationEntry(processVPN, ppn, true, section.isReadOnly(), true, false);
-				// prints out processvpn and vpn
-				// System.out.println("processVPN: " + processVPN + " vpn: " + vpn);
-				//prints out number of sections
-				// System.out.println("numSections: " + numSections);
-				//prints out 
 				section.loadPage(processVPN - sectionVpn, ppn);
 			
 
