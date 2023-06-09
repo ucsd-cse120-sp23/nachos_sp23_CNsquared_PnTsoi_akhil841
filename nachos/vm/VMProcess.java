@@ -138,7 +138,7 @@ public class VMProcess extends UserProcess {
 			//write from buffer to ppn
 			System.arraycopy(buffer, 0, Machine.processor().getMemory(), ppn*pageSize, pageSize);
 			
-			//Free the SPN
+			//Free the SPN //DO WE DO THIS?????
 			te.vpn = -1;
 			VMKernel.freeSPN(spn);
 			return 0;
@@ -159,72 +159,15 @@ public class VMProcess extends UserProcess {
 		}
 
 
-		//if it got through the loop then it isnt a coff section and thus a stack/argument		
+		//if it got through the loop then it isnt a coff section and thus a stack/argument and doesnt have anything stored in swap page	
 		byte[] zeroArray = new byte[Processor.pageSize];
 		System.arraycopy(zeroArray, 0, Machine.processor().getMemory(), ppn*pageSize, pageSize);
 		return -1;
 	}
 
- @Override
-	public String readVirtualMemoryString(int vaddr, int maxLength) {
-
-		Lib.assertTrue(maxLength >= 0);
-
-		byte[] bytes = new byte[maxLength + 1];
-
-		int bytesRead = this.readVirtualMemory(vaddr, bytes);
-
-		for (int length = 0; length < bytesRead; length++) {
-			if (bytes[length] == 0)
-				return new String(bytes, 0, length);
-		}
-
-		return null;
-	}
-
- @Override
-	public int readVirtualMemory(int vaddr, byte[] data) {
-		return this.readVirtualMemory(vaddr, data, 0, data.length);
-	}
-
- @Override
-	public int readVirtualMemory(int vaddr, byte[] data, int offset, int length) {
-		Lib.assertTrue(offset >= 0 && length >= 0
-				&& offset + length <= data.length);
-
-		byte[] memory = Machine.processor().getMemory();
-
-		int paddr;
-		int amountCopied = 0;
-
-		// loop for reading memory page by page
-
-		while (amountCopied < length) {
-
-			// get the physical address from virtual adresss
-
-			paddr = this.getPaddr(vaddr);
-			if (paddr < 0 || paddr >= memory.length) {
-				return -1;
-			}
-
-			// the amount that we read from this page is either the entire page( starting at
-			// the paddr) or the remainder of what we are supposed to copy
-			int amount = Math.min(length - amountCopied, pageSize - Processor.offsetFromAddress(vaddr));
-			// writes it to the data
-			System.arraycopy(memory, paddr, data, offset + amountCopied, amount);
-			amountCopied += amount;
-			// offsets the virtual address
-			vaddr += amount;
-
-		}
-
-		return amountCopied;
-	}
+ 
 
 	private int getPaddr(int vaddr) {
-		
-
 		int paddr = -1;
 
 		int vpn = Processor.pageFromAddress(vaddr);
@@ -234,25 +177,62 @@ public class VMProcess extends UserProcess {
 			return -1;
 		}
 
-		//page fault
+		//trying to access memory that is not allocated to program
 		if (pageTable[vpn] == null )
 			return -1;
 		
+		//page fault
 		if(!pageTable[vpn].valid){
 			System.out.println("Page fault called by get paddr");
 			handlePageFault(vaddr);
 		}
 		
 		int ppn = pageTable[vpn].ppn;
-
 		paddr = Processor.makeAddress(ppn, addrOffest);
-		
 
 		return paddr;
 
 	}
 
- @Override
+ 
+	private static final int pageSize = Processor.pageSize;
+
+	private static final char dbgProcess = 'a';
+
+	private static final char dbgVM = 'v';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	@Override
 	public int writeVirtualMemory(int vaddr, byte[] data) {
 		return this.writeVirtualMemory(vaddr, data, 0, data.length);
 	}
@@ -319,9 +299,57 @@ public class VMProcess extends UserProcess {
 		return !pageTable[vpn].readOnly;
 	}
 
-	private static final int pageSize = Processor.pageSize;
+	@Override
+	public String readVirtualMemoryString(int vaddr, int maxLength) {
 
-	private static final char dbgProcess = 'a';
+		Lib.assertTrue(maxLength >= 0);
+		byte[] bytes = new byte[maxLength + 1];
+		int bytesRead = this.readVirtualMemory(vaddr, bytes);
+		for (int length = 0; length < bytesRead; length++) {
+			if (bytes[length] == 0)
+				return new String(bytes, 0, length);
+		}
 
-	private static final char dbgVM = 'v';
+		return null;
+	}
+
+ @Override
+	public int readVirtualMemory(int vaddr, byte[] data) {
+		return this.readVirtualMemory(vaddr, data, 0, data.length);
+	}
+
+ @Override
+	public int readVirtualMemory(int vaddr, byte[] data, int offset, int length) {
+		Lib.assertTrue(offset >= 0 && length >= 0
+				&& offset + length <= data.length);
+
+		byte[] memory = Machine.processor().getMemory();
+
+		int paddr;
+		int amountCopied = 0;
+
+		// loop for reading memory page by page
+
+		while (amountCopied < length) {
+
+			// get the physical address from virtual adresss
+
+			paddr = this.getPaddr(vaddr);
+			if (paddr < 0 || paddr >= memory.length) {
+				return -1;
+			}
+
+			// the amount that we read from this page is either the entire page( starting at
+			// the paddr) or the remainder of what we are supposed to copy
+			int amount = Math.min(length - amountCopied, pageSize - Processor.offsetFromAddress(vaddr));
+			// writes it to the data
+			System.arraycopy(memory, paddr, data, offset + amountCopied, amount);
+			amountCopied += amount;
+			// offsets the virtual address
+			vaddr += amount;
+
+		}
+
+		return amountCopied;
+	}
 }
