@@ -9,5 +9,6 @@
 int
 main (int argc, char *argv[])
 {
+    printf("exit1.c\n");
     exit (123);
 }
