@@ -198,37 +198,6 @@ public class VMProcess extends UserProcess {
 
 	private static final char dbgVM = 'v';
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	@Override
 	public int writeVirtualMemory(int vaddr, byte[] data) {
 		return this.writeVirtualMemory(vaddr, data, 0, data.length);
