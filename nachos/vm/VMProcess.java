@@ -118,36 +118,32 @@ public class VMProcess extends UserProcess {
 	}
 
 	int handlePageFault(int vaddr) {
-		int numSections = coff.getNumSections();
-		int processVPN = Processor.pageFromAddress(vaddr);	
+		
+		int processVPN = Processor.pageFromAddress(vaddr);
+		TranslationEntry te = pageTable[processVPN];
+		
+		int ppn = VMKernel.getPPN(te);
+		te.used = true;
+		te.valid = true;
 
 		//check the coff sections for the vpn
+		int numSections = coff.getNumSections();
 		for(int i = 0; i < numSections; i++) {
 			CoffSection section = coff.getSection(i);
 			int sectionVpn = section.getFirstVPN();
 			int sectionLength = section.getLength();
 			
-
 			if( processVPN >= sectionVpn && processVPN < sectionVpn + sectionLength  ) {
 				
 				pageTable[processVPN] = new TranslationEntry(-1, -1, true, section.isReadOnly(), true, false);
-				int ppn = VMKernel.getPPN(pageTable[processVPN]);
-
-
 				section.loadPage(processVPN - sectionVpn, ppn);
-			
-
 				return 0;
 			}
 			
 		}
 
-		//if it got through the loop then it isnt a coff section and thus a stack/argument
-		
-		pageTable[processVPN] = new TranslationEntry(-1, -1, true, false, true, false);
 
-		int ppn = VMKernel.getPPN(pageTable[processVPN]);
-
+		//if it got through the loop then it isnt a coff section and thus a stack/argument		
 		byte[] zeroArray = new byte[Processor.pageSize];
 		System.arraycopy(zeroArray, 0, Machine.processor().getMemory(), ppn*pageSize, pageSize);
 		return -1;
