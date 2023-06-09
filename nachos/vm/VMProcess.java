@@ -130,7 +130,7 @@ public class VMProcess extends UserProcess {
 
 			if( processVPN >= sectionVpn && processVPN < sectionVpn + sectionLength  ) {
 				
-				pageTable[processVPN] = new TranslationEntry(processVPN, -1, true, section.isReadOnly(), true, false);
+				pageTable[processVPN] = new TranslationEntry(-1, -1, true, section.isReadOnly(), true, false);
 				int ppn = VMKernel.getPPN(pageTable[processVPN]);
 
 
@@ -144,7 +144,7 @@ public class VMProcess extends UserProcess {
 
 		//if it got through the loop then it isnt a coff section and thus a stack/argument
 		
-		pageTable[processVPN] = new TranslationEntry(processVPN, -1, true, false, true, false);
+		pageTable[processVPN] = new TranslationEntry(-1, -1, true, false, true, false);
 
 		int ppn = VMKernel.getPPN(pageTable[processVPN]);
 

@@ -58,7 +58,6 @@ public class VMKernel extends UserKernel {
  
 	public static int getPPN(TranslationEntry te){
 		
-		//Machine.interrupt().disable();
 		initLock.acquire();
 		if(physicalMemoryAvail == null){
 			initializeMemory();
@@ -67,18 +66,16 @@ public class VMKernel extends UserKernel {
 
 		if(physicalMemoryAvail.size() > 0){
 			initLock.release();
-			//Machine.interrupt().enable();
 			int out = physicalMemoryAvail.pop();
 			te.ppn = out;
 			ipt[out] = te;
-			//used.put(out, true);
 			return out;
 		}
 		
 		int freePPNIdx = clockPPN();
 		writeEvictedToSwapFile(freePPNIdx);
 		initLock.release();
-		//Machine.interrupt().enable();
+		
 		return freePPNIdx;
 	}
 
@@ -159,16 +156,16 @@ public class VMKernel extends UserKernel {
 
 	public static int freePPN(int page){
 		initLock.acquire();
-		//Machine.interrupt().disable();
+		
 		if(physicalMemoryAvail.contains(page)){
 			initLock.release();
 			ipt[page] = null;
-			//Machine.interrupt().enable();
+			
 			return -1;
 		}
 		initLock.release();
 		physicalMemoryAvail.add(page);
-		//Machine.interrupt().enable();
+		
 		return 0;
 
 	}
