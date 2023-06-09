@@ -250,7 +250,6 @@ public class VMProcess extends UserProcess {
 		// System.out.println("writeVirtualMemory starts");
 
 		// loop for reading memory page by page
-
 		while (amountWritten < length) {
 			// System.out.println("length: " + length);
 
@@ -267,6 +266,12 @@ public class VMProcess extends UserProcess {
 
 			// writes it to the data
 			System.arraycopy(data, offset + amountWritten, memory, paddr, amount);
+			
+			///////////
+			TranslationEntry te = pageTable[Processor.pageFromAddress(vaddr)];
+			te.dirty = true;
+			//////////
+
 			amountWritten += amount;
 			// offsets the virtual address
 			vaddr += amount;

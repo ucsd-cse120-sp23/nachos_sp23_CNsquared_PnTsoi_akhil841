@@ -72,6 +72,7 @@ public class VMKernel extends UserKernel {
 			return out;
 		}
 		
+		System.out.println("Using clock algo");
 		int freePPNIdx = clockPPN();
 		writeEvictedToSwapFile(freePPNIdx);
 		initLock.release();
@@ -81,10 +82,6 @@ public class VMKernel extends UserKernel {
 
 	public static void pinPage(int paddr, boolean status) {
 		pinArray[paddr] = status;
-	}
-
-	public static int evictPPN(){
-		return -1;
 	}
 
 	//get idx of first free page
@@ -116,31 +113,28 @@ public class VMKernel extends UserKernel {
 	public static int writeEvictedToSwapFile(int evictedIPTIndex) {
 		//get evicted entry
 		TranslationEntry evictedEntry = ipt[evictedIPTIndex];
+		evictedEntry.valid = false;
+		
 		int evictedPPN = evictedEntry.ppn;
 		int physPageAddr = evictedPPN*Processor.pageSize;	
+
 		//read from physPage
 		byte[] physPage = new byte[Processor.pageSize];
-		System.arraycopy(Machine.processor().getMemory(), physPageAddr,
-		 physPage, 0, Processor.pageSize);
+		System.arraycopy(Machine.processor().getMemory(), physPageAddr,physPage, 0, Processor.pageSize);
 
 		int spn = getSPN();
-
 		if(evictedEntry.dirty) {
 			//not clean
 			//write to swap file
 			//get spn
 			if(spn == -1) {
-				int writeSize = swapFile.write(  swapFile.length()    , physPage, 0, Processor.pageSize);
-				// update swapPageTable
-				//swapPageTable[evictedEntry.ppn] = (swapFile.length() / Processor.pageSize )-1;
+				int writeSize = swapFile.write( swapFile.length(), physPage, 0, Processor.pageSize);
 				evictedEntry.vpn = (swapFile.length() / Processor.pageSize )-1;
 				return 1;
 			}
 			else {
 				//write to swap file
 				int writeSize = swapFile.write(spn*Processor.pageSize, physPage, 0, Processor.pageSize);
-				// update swapPageTable
-				//swapPageTable[evictedEntry.ppn] = spn;
 				evictedEntry.vpn = spn;
 				return 1;
 			}
@@ -148,7 +142,7 @@ public class VMKernel extends UserKernel {
 		else {
 			//clean 
 			//do nothing
-			//already evicted and nothing is changed on disk
+			//not dirty i.e. never written to
 			return 1;
 		}
 
