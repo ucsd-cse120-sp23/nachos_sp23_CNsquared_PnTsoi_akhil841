@@ -68,7 +68,6 @@ public class VMProcess extends UserProcess {
 
 		for (int i = 0; i < 9; i++) {
 
-			//int ppn = UserKernel.getPPN();
 			int vpn = lastVpn + i + 1;
 			pageTable[vpn] = new TranslationEntry(-1, -1, false, false, false, false);
 		}
@@ -89,7 +88,7 @@ public class VMProcess extends UserProcess {
 		for (int i = 0; i < pageTable.length; i++) {
 			TranslationEntry entry = pageTable[i];
 			if (entry != null && entry.valid == true)
-				UserKernel.freePPN(entry.ppn);
+				VMKernel.freePPN(entry.ppn);
 
 			pageTable[i] = null;
 		}
@@ -110,7 +109,6 @@ public class VMProcess extends UserProcess {
 		case Processor.exceptionPageFault:
 			System.out.println("Page Fault called by nachos");
 			int result2 = handlePageFault(processor.readRegister(Processor.regBadVAddr));
-			// processor.writeRegister(Processor.regV0, result2);
 			//do not advance PC so program attempts to read address again
 			break;
 		default:
@@ -132,11 +130,10 @@ public class VMProcess extends UserProcess {
 
 			if( processVPN >= sectionVpn && processVPN < sectionVpn + sectionLength  ) {
 				
-				int ppn = UserKernel.getPPN();
-				if (ppn == -1) {
-					return -1;
-				}
-				pageTable[processVPN] = new TranslationEntry(processVPN, ppn, true, section.isReadOnly(), true, false);
+				pageTable[processVPN] = new TranslationEntry(processVPN, -1, true, section.isReadOnly(), true, false);
+				int ppn = VMKernel.getPPN(pageTable[processVPN]);
+
+
 				section.loadPage(processVPN - sectionVpn, ppn);
 			
 
@@ -146,8 +143,11 @@ public class VMProcess extends UserProcess {
 		}
 
 		//if it got through the loop then it isnt a coff section and thus a stack/argument
-		int ppn = UserKernel.getPPN();
-		pageTable[processVPN] = new TranslationEntry(processVPN, ppn, true, false, true, false);
+		
+		pageTable[processVPN] = new TranslationEntry(processVPN, -1, true, false, true, false);
+
+		int ppn = VMKernel.getPPN(pageTable[processVPN]);
+
 		byte[] zeroArray = new byte[Processor.pageSize];
 		System.arraycopy(zeroArray, 0, Machine.processor().getMemory(), ppn*pageSize, pageSize);
 		return -1;
