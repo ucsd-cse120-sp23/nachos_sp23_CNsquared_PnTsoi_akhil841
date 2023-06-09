@@ -191,6 +191,7 @@ public class VMProcess extends UserProcess {
 		}
 		
 		int ppn = pageTable[vpn].ppn;
+		System.out.println("Page recieved is: " + ppn);
 		paddr = Processor.makeAddress(ppn, addrOffest);
 
 		return paddr;
