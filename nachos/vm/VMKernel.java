@@ -93,6 +93,15 @@ public class VMKernel extends UserKernel {
 			pinArray[ppn] = status;
 	}
 
+	public static boolean isPinned(int paddr) {
+		int ppn = paddr / Processor.pageSize;
+		return pinArray[ppn];
+	}
+
+	public static boolean isPinnedPPN(int ppn) {
+		return pinArray[ppn];
+	}
+
 	//get idx of first free page
 	public static int clockPPN() {
 		if (physicalMemoryAvail.size() > 0)

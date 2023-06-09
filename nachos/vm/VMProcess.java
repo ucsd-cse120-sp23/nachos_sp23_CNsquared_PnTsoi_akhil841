@@ -1,6 +1,7 @@
 package nachos.vm;
 
 import nachos.machine.*;
+import nachos.threads.Lock;
 import nachos.userprog.*;
 
 /**
@@ -239,12 +240,16 @@ public class VMProcess extends UserProcess {
 		// loop for reading memory page by page
 
 		while (amountWritten < length) {
+			rwLock.acquire();
 			// System.out.println("length: " + length);
 
 			// get the physical address from virtual adresss
 			paddr = this.getPaddr(vaddr);
 			if (paddr == -1)
+			{
+				rwLock.release();
 				return -1;
+			}
 			VMKernel.pinPage(paddr, true);
 			/*if (paddr < 0 || paddr >= memory.length || !validWrite(vaddr)) {
 				return amountWritten;
@@ -252,21 +257,24 @@ public class VMProcess extends UserProcess {
 
 			// the amount that we write to this page is either the entire page( starting at
 			// the paddr) or the remainder of what we are supposed to write
+			TranslationEntry te = pageTable[Processor.pageFromAddress(vaddr)];
 			int amount = Math.min(length - amountWritten, pageSize - Processor.offsetFromAddress(vaddr));
 			// System.out.println("amount: " + amount);
 
 			// writes it to the data
-			System.arraycopy(data, offset + amountWritten, memory, paddr, amount);
+			if (!te.readOnly)
+			{
+				System.arraycopy(data, offset + amountWritten, memory, paddr, amount);
+				amountWritten += amount;
+			}
 			///////////
-			TranslationEntry te = pageTable[Processor.pageFromAddress(vaddr)];
 			te.dirty = true;
 			//////////
 			VMKernel.pinPage(paddr, false);
-			amountWritten += amount;
 			// offsets the virtual address
 			vaddr += amount;
 			// System.out.println("vaddr: " + vaddr);
-
+			rwLock.release();
 		}
 		return amountWritten;
 
@@ -327,7 +335,7 @@ public class VMProcess extends UserProcess {
 			
 
 		if(!pageTable[vpn].valid){
-			System.out.println("Page fault called by valid write");
+			//System.out.println("Page fault called by valid write");
 			handlePageFault(vaddr);
 		}
 			
@@ -358,7 +366,6 @@ public class VMProcess extends UserProcess {
 	public int readVirtualMemory(int vaddr, byte[] data, int offset, int length) {
 		Lib.assertTrue(offset >= 0 && length >= 0
 				&& offset + length <= data.length);
-
 		byte[] memory = Machine.processor().getMemory();
 
 		int paddr;
@@ -367,13 +374,16 @@ public class VMProcess extends UserProcess {
 		// loop for reading memory page by page
 
 		while (amountCopied < length) {
-
+			rwLock.acquire();
 			// get the physical address from virtual adresss
 			
 			paddr = this.getPaddr(vaddr);
 			if (paddr == -1)
+			{
+				rwLock.release();
 				return -1;
-			System.out.println(paddr);
+			}
+			//System.out.println(paddr);
 			VMKernel.pinPage(paddr, true);
 			/*if (paddr < 0 || paddr >= memory.length) {
 				return -1;
@@ -388,7 +398,7 @@ public class VMProcess extends UserProcess {
 			amountCopied += amount;
 			// offsets the virtual address
 			vaddr += amount;
-
+			rwLock.release();
 		}
 
 		return amountCopied;
@@ -424,4 +434,8 @@ public class VMProcess extends UserProcess {
 
 		// return amountCopied;
 	}
+
+	//Lock lock = new Lock();
+	Lock rwLock = new Lock();
+	//Condition freePages = new Condition(lock);
 }

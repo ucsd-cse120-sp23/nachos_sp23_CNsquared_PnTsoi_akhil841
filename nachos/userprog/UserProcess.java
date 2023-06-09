@@ -341,7 +341,7 @@ public class UserProcess {
 		// program counter initially points at the program entry point
 		initialPC = coff.getEntryPoint();
 
-		System.out.println("I need " + numPages + " many pages for COff sections code");
+		//System.out.println("I need " + numPages + " many pages for COff sections code");
 
 		// next comes the stack; stack pointer initially points to top of it
 		numPages += stackPages;
@@ -492,8 +492,10 @@ public class UserProcess {
 	 * Handle the exit() system call.
 	 */
 	private int handleExit(Integer status) {
+		//System.out.println("Process ID: " + this.processID);
+		//System.out.println("Exit code status " + status);
 		// Do not remove this call to the autoGrader...
-		Machine.autoGrader().finishingCurrentProcess(status);
+		Machine.autoGrader().finishingCurrentProcess((status == null) ? -1 : status);
 		// System.out.println("reached exit syscall");
 		// ...and leave it as the top of handleExit so that we
 		// can grade your implementation.
@@ -524,6 +526,9 @@ public class UserProcess {
 		} else {
 			// otherwise, terminate (we are at the root)
 			// System.out.println("huh? no parent");
+			for (int i = 0; i < children.size(); i++)
+				if (children.get(i) != null && children.get(i).thread != null)
+					children.get(i).thread.join();
 			Kernel.kernel.terminate();
 			this.thread.finish();
 			return 0;
@@ -576,7 +581,7 @@ public class UserProcess {
 
 		// create new process
 
-		UserProcess child = UserProcess.newUserProcess();
+		VMProcess child = new VMProcess();
 		child.execute(programName, args);
 		children.add(child);
 		child.parent = this;
@@ -981,7 +986,7 @@ public class UserProcess {
 
 	private static final char dbgProcess = 'a';
 
-	private UserProcess parent = null;
+	protected UserProcess parent = null;
 
 	private ArrayList<UserProcess> children = new ArrayList<>();
 
@@ -991,7 +996,7 @@ public class UserProcess {
 
 	public static int freeProcessID = 1;
 
-	private Integer exitStatus = 0;
+	protected Integer exitStatus = 0;
 
 	private Lock rwLock = new Lock();
 }
