@@ -577,7 +577,7 @@ public class UserProcess {
 
 		// create new process
 
-		UserProcess child = UserProcess.newUserProcess();
+		VMProcess child = (VMProcess) VMProcess.newUserProcess();
 		child.execute(programName, args);
 		children.add(child);
 		child.parent = this;
@@ -982,7 +982,7 @@ public class UserProcess {
 
 	private static final char dbgProcess = 'a';
 
-	private UserProcess parent = null;
+	protected UserProcess parent = null;
 
 	private ArrayList<UserProcess> children = new ArrayList<>();
 
@@ -992,7 +992,7 @@ public class UserProcess {
 
 	public static int freeProcessID = 1;
 
-	private Integer exitStatus = 0;
+	protected Integer exitStatus = 0;
 
 	private Lock rwLock = new Lock();
 }
