@@ -119,6 +119,7 @@ public class VMProcess extends UserProcess {
 		
 		int ppn = VMKernel.getPPN(te);
 		System.out.println("Ended up with ppn: " + ppn);
+		System.out.println("TE got ppn: " + te.ppn);
 		te.used = true;
 		te.valid = true;
 
