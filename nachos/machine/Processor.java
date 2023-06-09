@@ -249,6 +249,7 @@ public final class Processor {
 	 * @return a 32-bit address consisting of the specified page and offset.
 	 */
 	public static int makeAddress(int page, int offset) {
+		System.out.println("Page number: in makeAddress : " + page);
 		Lib.assertTrue(page >= 0 && page < maxPages);
 		Lib.assertTrue(offset >= 0 && offset < pageSize);
 
