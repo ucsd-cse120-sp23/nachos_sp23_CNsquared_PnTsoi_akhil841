@@ -258,6 +258,10 @@ public class VMProcess extends UserProcess {
 
 			// writes it to the data
 			System.arraycopy(data, offset + amountWritten, memory, paddr, amount);
+			///////////
+			TranslationEntry te = pageTable[Processor.pageFromAddress(vaddr)];
+			te.dirty = true;
+			//////////
 			VMKernel.pinPage(paddr, false);
 			amountWritten += amount;
 			// offsets the virtual address
