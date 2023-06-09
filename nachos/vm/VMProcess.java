@@ -118,6 +118,7 @@ public class VMProcess extends UserProcess {
 		TranslationEntry te = pageTable[processVPN];
 		
 		int ppn = VMKernel.getPPN(te);
+		System.out.println("Ended up with ppn: " + ppn);
 		te.used = true;
 		te.valid = true;
 
