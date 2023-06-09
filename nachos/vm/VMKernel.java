@@ -94,9 +94,9 @@ public class VMKernel extends UserKernel {
 	public static int clockPPN() {
 		if (physicalMemoryAvail.size() > 0)
 			return -1;
-		int eidx = 0;
+		int eidx = curEIDX;
 		int delta = Machine.processor().getNumPhysPages() >> 2;
-		int cidx = eidx + delta;
+		int cidx = (curCIDX == -1) ? eidx + delta : curCIDX;
 		while (eidx < ipt.length) 
 		{
 			//set to false
@@ -112,6 +112,8 @@ public class VMKernel extends UserKernel {
 			if (cidx == ipt.length)
 				cidx = 0;
 		}
+		curEIDX = eidx;
+		curCIDX = cidx;
 		return eidx;
 	}
 	//return 1 if successful
@@ -208,4 +210,6 @@ public class VMKernel extends UserKernel {
 
 	private static TranslationEntry[] ipt = new TranslationEntry[Machine.processor().getNumPhysPages()];
 	private static boolean[] pinArray = new boolean[Machine.processor().getNumPhysPages()];	
+	private static int curEIDX = 0;
+	private static int curCIDX = -1;
 }
