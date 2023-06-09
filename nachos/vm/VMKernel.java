@@ -76,6 +76,10 @@ public class VMKernel extends UserKernel {
 		int evictIdx = clockPPN();
 		System.out.println("Used clock algo and want to evict ipt: " + evictIdx);
 		int freePPN = writeEvictedToSwapFile(evictIdx);
+		//this is why we SRP but oopsie
+		te.ppn = freePPN;
+		ipt[freePPN] = te;
+
 		System.out.println("Freed ppn: " + freePPN);
 		initLock.release();
 		
