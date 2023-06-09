@@ -106,7 +106,7 @@ public class VMProcess extends UserProcess {
 
 		switch (cause) {
 		case Processor.exceptionPageFault:
-			System.out.println("Page Fault called by nachos");
+			//System.out.println("Page Fault called by nachos");
 			int result2 = handlePageFault(processor.readRegister(Processor.regBadVAddr));
 			//do not advance PC so program attempts to read address again
 			break;
@@ -121,7 +121,7 @@ public class VMProcess extends UserProcess {
 		
 		
 		int processVPN = Processor.pageFromAddress(vaddr);
-		System.out.println("Handling a page fault on vpn: " + processVPN);
+		//System.out.println("Handling a page fault on vpn: " + processVPN);
 		TranslationEntry te = pageTable[processVPN];
 		
 		int ppn = VMKernel.getPPN(te);
@@ -131,8 +131,8 @@ public class VMProcess extends UserProcess {
 		//if entry in the swap files exisits swap it in
 		int spn = te.vpn;
 		if(spn != -1){
-			System.out.println("Doing a swap to handle page fault");
-			System.out.println("swapping spn: " + spn + " into ppn: " + ppn);
+			//System.out.println("Doing a swap to handle page fault");
+			//System.out.println("swapping spn: " + spn + " into ppn: " + ppn);
 
 			//read from swap file to buffer
 			byte[] buffer = new byte[Processor.pageSize];
@@ -161,8 +161,8 @@ public class VMProcess extends UserProcess {
 			for (int j = 0; j < section.getLength(); j++) {
 				int vpn = section.getFirstVPN() + j;
 				if(vpn == processVPN){
-					System.out.println("Loading the coff section to fix page fault");
-					System.out.println("loading section: " + i + " with spn: " + j + " into ppn: " + ppn);
+					//System.out.println("Loading the coff section to fix page fault");
+					//System.out.println("loading section: " + i + " with spn: " + j + " into ppn: " + ppn);
 					section.loadPage(j, ppn);
 					return 0;
 				}
@@ -179,7 +179,7 @@ public class VMProcess extends UserProcess {
 		}
 
 		//if it got through the loop then it isnt a coff section and thus a stack/argument and doesnt have anything stored in swap page	
-		System.out.println("Zero filling to fix page fault");
+		//System.out.println("Zero filling to fix page fault");
 		byte[] zeroArray = new byte[Processor.pageSize];
 		System.arraycopy(zeroArray, 0, Machine.processor().getMemory(), ppn*pageSize, pageSize);
 		return -1;
@@ -203,7 +203,7 @@ public class VMProcess extends UserProcess {
 		
 		//page fault
 		if(!pageTable[vpn].valid || pageTable[vpn].ppn == -1){
-			System.out.println("Page fault called by get paddr");
+			//System.out.println("Page fault called by get paddr");
 			handlePageFault(vaddr);
 		}
 		
