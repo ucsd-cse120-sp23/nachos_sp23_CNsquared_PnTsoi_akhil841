@@ -160,6 +160,8 @@ public class VMProcess extends UserProcess {
 			for (int j = 0; j < section.getLength(); j++) {
 				int vpn = section.getFirstVPN() + j;
 				if(vpn == processVPN){
+					System.out.println("Loading the coff section to fix page fault");
+					System.out.println("loading section: " + section + "with spn: " + j + " into ppn: " + ppn);
 					section.loadPage(j, ppn);
 					return 0;
 				}
