@@ -106,7 +106,7 @@ public class VMProcess extends UserProcess {
 
 		switch (cause) {
 		case Processor.exceptionPageFault:
-			//System.out.println("Page Fault called by nachos");
+			System.out.println("Page Fault called by nachos");
 			int result2 = handlePageFault(processor.readRegister(Processor.regBadVAddr));
 			//do not advance PC so program attempts to read address again
 			break;
@@ -305,7 +305,7 @@ public class VMProcess extends UserProcess {
 			
 
 		if(!pageTable[vpn].valid){
-			//System.out.println("Page fault called by valid write");
+			System.out.println("Page fault called by valid write");
 			handlePageFault(vaddr);
 		}
 			
