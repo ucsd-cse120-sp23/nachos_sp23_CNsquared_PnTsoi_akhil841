@@ -1,5 +1,7 @@
 package nachos.vm;
 
+import nachos.threads.*;
+
 import nachos.machine.*;
 import nachos.userprog.*;
 
@@ -222,6 +224,8 @@ public class VMProcess extends UserProcess {
 
 	private static final char dbgVM = 'v';
 
+	private Lock suLock = new Lock();
+
 
 
 
@@ -260,6 +264,7 @@ public class VMProcess extends UserProcess {
 
  @Override
 	public int writeVirtualMemory(int vaddr, byte[] data, int offset, int length) {
+		suLock.acquire();
 		Lib.assertTrue(offset >= 0 && length >= 0
 				&& offset + length <= data.length);
 
@@ -277,6 +282,7 @@ public class VMProcess extends UserProcess {
 			// get the physical address from virtual adresss
 			paddr = this.getPaddr(vaddr);
 			if (paddr < 0 || paddr >= memory.length || !validWrite(vaddr)) {
+				suLock.release();
 				return amountWritten;
 			}
 
@@ -299,6 +305,7 @@ public class VMProcess extends UserProcess {
 			// System.out.println("vaddr: " + vaddr);
 
 		}
+		suLock.release();
 		return amountWritten;
 	}
 
@@ -346,6 +353,7 @@ public class VMProcess extends UserProcess {
 
  @Override
 	public int readVirtualMemory(int vaddr, byte[] data, int offset, int length) {
+		suLock.acquire();
 		Lib.assertTrue(offset >= 0 && length >= 0
 				&& offset + length <= data.length);
 
@@ -362,6 +370,7 @@ public class VMProcess extends UserProcess {
 
 			paddr = this.getPaddr(vaddr);
 			if (paddr < 0 || paddr >= memory.length) {
+				suLock.release();
 				return -1;
 			}
 
@@ -375,7 +384,7 @@ public class VMProcess extends UserProcess {
 			vaddr += amount;
 
 		}
-
+		suLock.release();
 		return amountCopied;
 	}
 }
