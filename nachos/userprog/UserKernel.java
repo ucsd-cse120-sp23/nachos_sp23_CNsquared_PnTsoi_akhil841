@@ -36,7 +36,7 @@ public class UserKernel extends ThreadedKernel {
 		
 	}
 
-	private static void initializeMemory(){
+	protected static void initializeMemory(){
 		
 		if (intialized == 0){
 			intialized = 1;
@@ -178,10 +178,10 @@ public class UserKernel extends ThreadedKernel {
 	public static SynchConsole console;
 
 
-	private static LinkedList<Integer> physicalMemoryAvail;
+	protected static LinkedList<Integer> physicalMemoryAvail;
 
 	// dummy variables to make javac smarter
 	private static Coff dummy1 = null;
 	private static int intialized = 0;
-	private static Lock initLock;
+	protected static Lock initLock;
 }

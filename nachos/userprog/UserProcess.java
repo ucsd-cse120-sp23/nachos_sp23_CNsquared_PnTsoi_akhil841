@@ -342,6 +342,8 @@ public class UserProcess {
 		// program counter initially points at the program entry point
 		initialPC = coff.getEntryPoint();
 
+		//System.out.println("I need " + numPages + " many pages for COff sections code");
+
 		// next comes the stack; stack pointer initially points to top of it
 		numPages += stackPages;
 		initialSP = numPages * pageSize;
@@ -401,16 +403,22 @@ public class UserProcess {
 			for (int i = 0; i < section.getLength(); i++) {
 				int vpn = section.getFirstVPN() + i;
 
+				 
 				// get availble physical page
 				int ppn = UserKernel.getPPN();
 				// if not return -1
 				if (ppn == -1) {
 					return false;
 				}
+				
 
 				// create translation entry from vpn to ppn
 				pageTable[vpn] = new TranslationEntry(vpn, ppn, true, section.isReadOnly(), false, false);
+				
+				
 				section.loadPage(i, ppn);
+				
+				
 				lastVpn = vpn;
 			}
 		}
@@ -705,7 +713,7 @@ public class UserProcess {
 
 	private int fileIndexNameLinearSearch(String name) {
 		for (int i = 2; i < 16; i++)
-			if (files[i].getName().equals(name))
+			if (files[i] != null && files[i].getName().equals(name))
 				return i;
 		return -1;
 	}
@@ -792,8 +800,11 @@ public class UserProcess {
 		// if child is finished, return immediately.
 		if (child.finished) {
 			Integer code = child.exitStatus;
-			byte[] mem = Lib.bytesFromInt( code);
-			writeVirtualMemory(ecAddr, mem, 0, 4);
+			if (code != null) 
+			{
+				byte[] mem = Lib.bytesFromInt( code);
+				writeVirtualMemory(ecAddr, mem, 0, 4);
+			}
 			//remove child since it's finished. makes this function return -1 if 
 			//join is called on it again, unless we exec it under the same child process.
 			children.remove(childIdx);
@@ -805,8 +816,11 @@ public class UserProcess {
 		child.thread.join();
 		// Machine.interrupt().enable();
 		Integer code = child.exitStatus;
-		byte[] mem = Lib.bytesFromInt( code);
-		writeVirtualMemory(ecAddr, mem, 0, 4);
+		if (code != null)
+		{
+			byte[] mem = Lib.bytesFromInt( code);
+			writeVirtualMemory(ecAddr, mem, 0, 4);
+		}
 		//remove child since it's finished. makes this function return -1 if 
 		//join is called on it again, unless we exec it under the same child process.
 		children.remove(childIdx);
@@ -932,14 +946,15 @@ public class UserProcess {
 				processor.writeRegister(Processor.regV0, result);
 				processor.advancePC();
 				break;
-
 			default:
 				Lib.debug(dbgProcess, "Unexpected exception: "
 						+ Processor.exceptionNames[cause]);
 				handleExit(null);
 				Lib.assertNotReached("Unexpected exception");
 		}
+		
 	}
+
 
 	/** Array of file descriptors to OpenFile Objects */
 	protected OpenFile[] files;
