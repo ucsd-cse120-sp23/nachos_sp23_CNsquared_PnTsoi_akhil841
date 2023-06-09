@@ -130,7 +130,7 @@ public class VMProcess extends UserProcess {
 
 			//read from swap file to buffer
 			byte[] buffer = new byte[Processor.pageSize];
-			VMKernel.swapFile.read(buffer, spn * Processor.pageSize, Processor.pageSize);
+			VMKernel.swapFile.read( spn * Processor.pageSize,buffer,0, Processor.pageSize);
 
 			//write from buffer to ppn
 			System.arraycopy(buffer, 0, Machine.processor().getMemory(), ppn*pageSize, pageSize);
