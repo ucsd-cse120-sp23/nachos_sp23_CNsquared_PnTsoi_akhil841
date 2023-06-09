@@ -139,12 +139,18 @@ public class VMKernel extends UserKernel {
 			if(spn == -1) {
 				int writeSize = swapFile.write( swapFile.length(), physPage, 0, Processor.pageSize);
 				evictedEntry.vpn = (swapFile.length() / Processor.pageSize )-1;
+
+				//cleans it
+				evictedEntry.dirty = false;
+
 				return evictedPPN;
 			}
 			else {
 				//write to swap file
 				int writeSize = swapFile.write(spn*Processor.pageSize, physPage, 0, Processor.pageSize);
 				evictedEntry.vpn = spn;
+				//cleans it
+				evictedEntry.dirty = false;
 				return evictedPPN;
 			}
 		}

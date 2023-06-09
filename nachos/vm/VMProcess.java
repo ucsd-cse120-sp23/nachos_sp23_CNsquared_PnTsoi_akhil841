@@ -82,8 +82,12 @@ public class VMProcess extends UserProcess {
 		// go through pagetable and free all of the physical pages
 		for (int i = 0; i < pageTable.length; i++) {
 			TranslationEntry entry = pageTable[i];
-			if (entry != null && entry.valid == true)
+			if (entry != null && entry.valid == true){
 				VMKernel.freePPN(entry.ppn);
+			}
+			if(entry != null){
+				VMKernel.freeSPN(entry.vpn);
+			}
 
 			pageTable[i] = null;
 		}
@@ -126,7 +130,7 @@ public class VMProcess extends UserProcess {
 		//if entry in the swap files exisits swap it in
 		int spn = te.vpn;
 		if(spn != -1){
-			//System.out.println("Doing a swap to handle page fault");
+			System.out.println("Doing a swap to handle page fault");
 
 			//read from swap file to buffer
 			byte[] buffer = new byte[Processor.pageSize];
@@ -135,9 +139,11 @@ public class VMProcess extends UserProcess {
 			//write from buffer to ppn
 			System.arraycopy(buffer, 0, Machine.processor().getMemory(), ppn*pageSize, pageSize);
 			
-			//Free the SPN //DO WE DO THIS?????
+			//Free the SPN //DO WE DO THIS????? //I DONT THINK WE DO THIS
+			/* 
 			te.vpn = -1;
 			VMKernel.freeSPN(spn);
+			*/
 			return 0;
 
 		}
@@ -150,6 +156,7 @@ public class VMProcess extends UserProcess {
 			int sectionLength = section.getLength();
 			
 			if( processVPN >= sectionVpn && processVPN < sectionVpn + sectionLength ) {
+				System.out.println("Loading the coff section to fix page fault");
 				section.loadPage(processVPN - sectionVpn, ppn);
 				return 0;
 			}
@@ -157,6 +164,7 @@ public class VMProcess extends UserProcess {
 
 
 		//if it got through the loop then it isnt a coff section and thus a stack/argument and doesnt have anything stored in swap page	
+		System.out.println("Zero filling to fix page fault");
 		byte[] zeroArray = new byte[Processor.pageSize];
 		System.arraycopy(zeroArray, 0, Machine.processor().getMemory(), ppn*pageSize, pageSize);
 		return -1;
@@ -180,11 +188,12 @@ public class VMProcess extends UserProcess {
 		
 		//page fault
 		if(!pageTable[vpn].valid || pageTable[vpn].ppn == -1){
-			//System.out.println("Page fault called by get paddr");
+			System.out.println("Page fault called by get paddr");
 			handlePageFault(vaddr);
 		}
 		
 		int ppn = pageTable[vpn].ppn;
+		//System.out.println("Page recieved is: " + ppn);
 		paddr = Processor.makeAddress(ppn, addrOffest);
 
 		return paddr;
