@@ -13,7 +13,7 @@ main (int argc, char *argv[])
 {
     char *prog[5] = {"swap4.coff", "swap4.coff", "swap4.coff", "swap5.coff", "write10.coff"};
     int pid;
-
+    
     int i;
     for (i = 0; i < 5; i++) {
         pid = exec (prog[i], 0, 0);

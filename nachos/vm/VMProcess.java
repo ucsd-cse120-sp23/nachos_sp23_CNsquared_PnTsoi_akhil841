@@ -186,7 +186,7 @@ public class VMProcess extends UserProcess {
 		
 		//page fault
 		if(!pageTable[vpn].valid || pageTable[vpn].ppn == -1){
-			//System.out.println("Page fault called by get paddr");
+			System.out.println("Page fault called by get paddr");
 			handlePageFault(vaddr);
 		}
 		
