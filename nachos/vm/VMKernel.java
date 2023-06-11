@@ -5,6 +5,7 @@ import nachos.machine.Machine;
 import nachos.machine.OpenFile;
 import nachos.machine.Processor;
 import nachos.machine.TranslationEntry;
+import nachos.threads.Lock;
 import nachos.userprog.*;
 import nachos.vm.*;
 
@@ -27,7 +28,8 @@ public class VMKernel extends UserKernel {
 	public void initialize(String[] args) {
 		super.initialize(args);
 		swapFile = fileSystem.open("swapFile", true);
-
+		swapLock = new Lock();
+		evictLock = new Lock();
 	}
 
 	/**
@@ -87,25 +89,48 @@ public class VMKernel extends UserKernel {
 	}
 
 	public static void pinPage(int paddr, boolean status) {
+		evictLock.acquire();
 		int ppn = paddr / Processor.pageSize;
 		TranslationEntry curPage = ipt[ppn];
 		if (curPage != null && curPage.valid)
 			pinArray[ppn] = status;
+		evictLock.release();
 	}
 
 	public static boolean isPinned(int paddr) {
+		evictLock.acquire();
 		int ppn = paddr / Processor.pageSize;
+		evictLock.release();
 		return pinArray[ppn];
 	}
 
-	public static boolean isPinnedPPN(int ppn) {
-		return pinArray[ppn];
+	public static boolean allPinned() {
+		evictLock.acquire();
+		if (physicalMemoryAvail.size() > 0)
+		{
+			evictLock.release();
+			return false;
+		}
+		for (int i = 0; i < pinArray.length; i++)
+		{
+			if (!pinArray[i])
+			{
+				evictLock.release();
+				return false;
+			}
+		}
+		evictLock.release();
+		return true;
 	}
 
 	//get idx of first free page
 	public static int clockPPN() {
+		evictLock.acquire();
 		if (physicalMemoryAvail.size() > 0)
+		{
+			evictLock.release();
 			return -1;
+		}
 		int eidx = curEIDX;
 		int delta = Machine.processor().getNumPhysPages() >> 2;
 		int cidx = (curCIDX == -1) ? eidx + delta : curCIDX;
@@ -126,11 +151,13 @@ public class VMKernel extends UserKernel {
 		}
 		curEIDX = eidx;
 		curCIDX = cidx;
+		evictLock.release();
 		return eidx;
 	}
 	//return 1 if successful
 	//return 0 if not
 	public static int writeEvictedToSwapFile(int evictedIPTIndex) {
+		evictLock.acquire();
 		//get evicted entry
 		TranslationEntry evictedEntry = ipt[evictedIPTIndex];
 		evictedEntry.valid = false;
@@ -155,7 +182,7 @@ public class VMKernel extends UserKernel {
 
 				//cleans it
 				evictedEntry.dirty = false;
-
+				evictLock.release();
 				return evictedPPN;
 			}
 			else {
@@ -164,6 +191,7 @@ public class VMKernel extends UserKernel {
 				evictedEntry.vpn = spn;
 				//cleans it
 				evictedEntry.dirty = false;
+				evictLock.release();
 				return evictedPPN;
 			}
 		}
@@ -171,6 +199,7 @@ public class VMKernel extends UserKernel {
 			//clean 
 			//do nothing
 			//not dirty i.e. never written to
+			evictLock.release();
 			return evictedPPN;
 		}
 
@@ -194,17 +223,23 @@ public class VMKernel extends UserKernel {
 
 	//if there is free pages then 
 	public static int getSPN(){
+		swapLock.acquire();
 		if(swapFileFreePages.size() > 0){
+			swapLock.release();
 			return swapFileFreePages.pop();
 		}
+		swapLock.release();
 		return -1;
 	}
 
 	//add locks
 	public static int freeSPN(int page){
+		swapLock.acquire();
 		if(swapFileFreePages.contains(page)){
+			swapLock.release();
 			return -1;
 		}	
+		swapLock.release();
 		swapFileFreePages.add(page);
 		
 		return 0;
@@ -224,4 +259,6 @@ public class VMKernel extends UserKernel {
 	private static boolean[] pinArray = new boolean[Machine.processor().getNumPhysPages()];	
 	private static int curEIDX = 0;
 	private static int curCIDX = -1;
+	private static Lock swapLock;
+	private static Lock evictLock;
 }

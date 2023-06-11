@@ -1,6 +1,7 @@
 package nachos.vm;
 
 import nachos.machine.*;
+import nachos.threads.Condition;
 import nachos.threads.Lock;
 import nachos.userprog.*;
 
@@ -199,18 +200,21 @@ public class VMProcess extends UserProcess {
 
 		//trying to access memory that is not allocated to program
 		if (pageTable[vpn] == null )
+		{
 			return -1;
+		}	
 		
 		//page fault
 		if(!pageTable[vpn].valid || pageTable[vpn].ppn == -1){
 			//System.out.println("Page fault called by get paddr");
+			while (VMKernel.allPinned())
+				rwCV.sleep();
 			handlePageFault(vaddr);
 		}
 		
 		int ppn = pageTable[vpn].ppn;
 		//System.out.println("Page recieved is: " + ppn);
 		paddr = Processor.makeAddress(ppn, addrOffest);
-
 		return paddr;
 
 	}
@@ -240,14 +244,11 @@ public class VMProcess extends UserProcess {
 		// loop for reading memory page by page
 
 		while (amountWritten < length) {
-			rwLock.acquire();
 			// System.out.println("length: " + length);
-
 			// get the physical address from virtual adresss
 			paddr = this.getPaddr(vaddr);
 			if (paddr == -1)
 			{
-				rwLock.release();
 				return -1;
 			}
 			VMKernel.pinPage(paddr, true);
@@ -271,10 +272,12 @@ public class VMProcess extends UserProcess {
 			te.dirty = true;
 			//////////
 			VMKernel.pinPage(paddr, false);
+			lock.acquire();
+			rwCV.wake();
+			lock.release();
 			// offsets the virtual address
 			vaddr += amount;
 			// System.out.println("vaddr: " + vaddr);
-			rwLock.release();
 		}
 		return amountWritten;
 
@@ -374,13 +377,11 @@ public class VMProcess extends UserProcess {
 		// loop for reading memory page by page
 
 		while (amountCopied < length) {
-			rwLock.acquire();
 			// get the physical address from virtual adresss
 			
 			paddr = this.getPaddr(vaddr);
 			if (paddr == -1)
 			{
-				rwLock.release();
 				return -1;
 			}
 			//System.out.println(paddr);
@@ -395,10 +396,12 @@ public class VMProcess extends UserProcess {
 			// writes it to the data
 			System.arraycopy(memory, paddr, data, offset + amountCopied, amount);
 			VMKernel.pinPage(paddr, false);
+			lock.acquire();
+			rwCV.wake();
+			lock.release();
 			amountCopied += amount;
 			// offsets the virtual address
 			vaddr += amount;
-			rwLock.release();
 		}
 
 		return amountCopied;
@@ -435,7 +438,7 @@ public class VMProcess extends UserProcess {
 		// return amountCopied;
 	}
 
-	//Lock lock = new Lock();
-	Lock rwLock = new Lock();
+	Lock lock = new Lock();
+	Condition rwCV = new Condition(lock);
 	//Condition freePages = new Condition(lock);
 }
