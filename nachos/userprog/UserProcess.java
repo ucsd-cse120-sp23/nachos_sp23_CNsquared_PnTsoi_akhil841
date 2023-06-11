@@ -724,6 +724,10 @@ public class UserProcess {
 
 	private int handleOpen(String name) {
 
+		int filesIndex = fileIndexNameLinearSearch(name);
+		if (filesIndex != -1)
+			files[filesIndex].close();
+
 		OpenFile returned = ThreadedKernel.fileSystem.open(name, false);
 
 		if (returned == null) {
@@ -732,7 +736,7 @@ public class UserProcess {
 			return -1;
 		}
 
-		int filesIndex = findOpenTableIndex();
+		filesIndex = findOpenTableIndex();
 		// There was no space for it in the table
 		if (filesIndex == -1) {
 			Lib.debug(dbgProcess, "No space for " + name);

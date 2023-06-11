@@ -11,11 +11,11 @@
 int
 main (int argc, char *argv[])
 {
-    char *prog[7] = {"swap4.coff", "swap4.coff", "swap4.coff", "swap5.coff", "swap5.coff", "swap5.coff", "write10.coff"};
+    char *prog[10] = {"write10.coff", "write10.coff", "write10.coff", "write10.coff", "write10.coff", "write10.coff", "write10.coff", "write10.coff", "write10.coff", "write10.coff"};
     int pid;
     
     int i;
-    for (i = 0; i < 7; i++) {
+    for (i = 0; i < 10; i++) {
         printf("Running %s\n", prog[i]);
         pid = exec (prog[i], 0, 0);
         printf("%d\n", pid);
